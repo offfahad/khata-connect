@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:khata_connect/pages/backup/backup.dart';
+import 'package:khata_connect/pages/setting/currency_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
@@ -27,7 +28,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final themeStatus = Provider.of<MyThemeProvider>(context);
-    Color color = themeStatus.themeType ? Colors.white : Colors.black;
+    Color color = themeStatus.themeType ? Colors.black : Colors.white;
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -81,15 +82,18 @@ class _SettingsState extends State<Settings> {
                       shrinkWrap: true,
                       children: <Widget>[
                         SwitchListTile(
-                            title: const Text(
-                              'Theme',
-                              style: TextStyle(fontWeight: FontWeight.normal),
+                            title: Text(
+                              AppLocalizations.of(context)!.translate('theme'),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.normal),
                             ),
+                            subtitle: Text(AppLocalizations.of(context)!
+                                .translate('themeSubtitle')),
                             secondary: Icon(
                               themeStatus.themeType
                                   ? Icons.dark_mode_outlined
                                   : Icons.light_mode_outlined,
-                              size: 35,
+                              size: 30,
                             ),
                             value: themeStatus.themeType,
                             onChanged: (value) {
@@ -127,8 +131,8 @@ class _SettingsState extends State<Settings> {
                           ),
                         ),
                         InkWell(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => Backup(),
@@ -158,12 +162,13 @@ class _SettingsState extends State<Settings> {
                           subtitle: Text(AppLocalizations.of(context)!
                               .translate('languageInfoMeta')),
                           trailing: DropdownButton<String>(
+                            iconEnabledColor: Colors.black,
                             value: Provider.of<AppStateNotifier>(context)
                                 .appLocale,
                             onChanged: (String? newValue) async {
                               await changeLanguage(context, newValue!);
                             },
-                            items: <String>["en", "ne"]
+                            items: <String>["en", "ur"]
                                 .map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                   value: value,
@@ -181,45 +186,70 @@ class _SettingsState extends State<Settings> {
                             }).toList(),
                           ),
                         ),
-                        ListTile(
-                          leading: const Image(
-                            image: AssetImage("assets/images/calendar.png"),
-                            width: 30,
-                            height: 30,
-                          ),
-                          title: Text(AppLocalizations.of(context)!
-                              .translate('changeCalendar')),
-                          subtitle: Text(AppLocalizations.of(context)!
-                              .translate('changeCalendarMeta')),
-                          trailing: DropdownButton<String>(
-                            value:
-                                Provider.of<AppStateNotifier>(context).calendar,
-                            onChanged: (String? newValue) async {
-                              await changeCalendar(context, newValue!);
-                            },
-                            items: <String>["en", "ne"]
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Row(
-                                    children: [
-                                      Text(value == "en" ? "English" : "Urdu"),
-                                    ],
-                                  ));
-                            }).toList(),
-                          ),
-                        ),
+                        // ListTile(
+                        //   leading: const Image(
+                        //     image: AssetImage("assets/images/calendar.png"),
+                        //     width: 30,
+                        //     height: 30,
+                        //   ),
+                        //   title: Text(AppLocalizations.of(context)!
+                        //       .translate('changeCalendar')),
+                        //   subtitle: Text(AppLocalizations.of(context)!
+                        //       .translate('changeCalendarMeta')),
+                        //   trailing: DropdownButton<String>(
+                        //     iconEnabledColor: Colors.black,
+                        //     value:
+                        //         Provider.of<AppStateNotifier>(context).calendar,
+                        //     onChanged: (String? newValue) async {
+                        //       await changeCalendar(context, newValue!);
+                        //     },
+                        //     items: <String>["en", "ur"]
+                        //         .map<DropdownMenuItem<String>>((String value) {
+                        //       return DropdownMenuItem<String>(
+                        //           value: value,
+                        //           child: Row(
+                        //             children: [
+                        //               Text(value == "en" ? "English" : "Urdu"),
+                        //             ],
+                        //           ));
+                        //     }).toList(),
+                        //   ),
+                        // ),
+                        // InkWell(
+                        //   onTap: () {
+                        //     showBottomSheet(
+                        //       context: context,
+                        //       builder: (context) => StatefulBuilder(builder:
+                        //           (BuildContext context, StateSetter setState) {
+                        //         return Transform.translate(
+                        //           offset: const Offset(0.0, 80.0),
+                        //           child: contactForm(context),
+                        //         );
+                        //       }),
+                        //     );
+                        //   },
+                        //   child: ListTile(
+                        //     leading: const Image(
+                        //       image: AssetImage("assets/images/currency.png"),
+                        //       width: 30,
+                        //       height: 30,
+                        //     ),
+                        //     title: Text(AppLocalizations.of(context)!
+                        //         .translate('changeCurrency')),
+                        //     subtitle: Text(AppLocalizations.of(context)!
+                        //         .translate('changeCurrencyMeta')),
+                        //     trailing: Text(
+                        //         Provider.of<AppStateNotifier>(context)
+                        //             .currency),
+                        //   ),
+                        // ),
                         InkWell(
                           onTap: () {
-                            showBottomSheet(
-                              context: context,
-                              builder: (context) => StatefulBuilder(builder:
-                                  (BuildContext context, StateSetter setState) {
-                                return Transform.translate(
-                                  offset: const Offset(0.0, 80.0),
-                                  child: contactForm(context),
-                                );
-                              }),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CurrencySelectionScreen(),
+                              ),
                             );
                           },
                           child: ListTile(
@@ -228,13 +258,15 @@ class _SettingsState extends State<Settings> {
                               width: 30,
                               height: 30,
                             ),
-                            title: Text(AppLocalizations.of(context)!
-                                .translate('changeCurrency')),
-                            subtitle: Text(AppLocalizations.of(context)!
-                                .translate('changeCurrencyMeta')),
-                            trailing: Text(
-                                Provider.of<AppStateNotifier>(context)
-                                    .currency),
+                            title: Text(
+                              AppLocalizations.of(context)!
+                                  .translate('changeCurrency'),
+                            ),
+                            subtitle: Text(
+                              AppLocalizations.of(context)!
+                                  .translate('changeCurrencyMeta'),
+                            ),
+                            trailing: Text(Provider.of<AppStateNotifier>(context).currency, style: const TextStyle(fontSize: 16),),
                           ),
                         ),
                         InkWell(
@@ -277,46 +309,49 @@ class _SettingsState extends State<Settings> {
       ),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              AppLocalizations.of(context)!.translate('changeCurrency'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            TextFormField(
-              textAlign: TextAlign.left,
-              initialValue: _currency,
-              onSaved: (String? val) {
-                _currency = val!;
-              },
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return AppLocalizations.of(context)!
-                      .translate('currencyError');
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                //foregroundColor: Colors.white,
-                backgroundColor: xDarkBlue, // Text color
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                AppLocalizations.of(context)!.translate('changeCurrency'),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-              child: Text(
-                AppLocalizations.of(context)!.translate('updateCurrency'),
-                style: const TextStyle(color: Colors.white),
+              TextFormField(
+                textAlign: TextAlign.left,
+                initialValue: _currency,
+                onSaved: (String? val) {
+                  _currency = val!;
+                },
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return AppLocalizations.of(context)!
+                        .translate('currencyError');
+                  }
+                  return null;
+                },
               ),
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  await changeCurrency(context, _currency);
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  //foregroundColor: Colors.white,
+                  backgroundColor: xDarkBlue, // Text color
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.translate('updateCurrency'),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    await changeCurrency(context, _currency);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

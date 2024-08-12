@@ -82,5 +82,7 @@
   "currencyError": "Currency empty",
   "backupRestored": "Backup restored successfully",
   "backupDone": "Backup successfully done",
-  "inbox": "Inbox"
+  "inbox": "Inbox",
+  "theme": "Theme",
+  "themeSubtitle": "Change your theme preference"
 }

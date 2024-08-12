@@ -93,8 +93,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/i18n/en.json
+    - assets/i18n/ur.json
     - assets/i18n/ne.json
-    - assets/i18n/pk.json
     - assets/images/no_image.jpg
     - assets/images/logo.png
     - assets/images/noimage_person.png
@@ -103,6 +103,7 @@ flutter:
     - assets/images/logo-512.png
     - assets/images/en.png
     - assets/images/ne.png
+    - assets/images/ur.png
     - assets/images/cv_template.png
     - assets/images/share.png
     - assets/images/lang.png

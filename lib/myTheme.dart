@@ -31,6 +31,8 @@ class MyTheme {
             buttonTheme: Theme.of(context)
                 .buttonTheme
                 .copyWith(colorScheme: const ColorScheme.light()),
+            
             listTileTheme: const ListTileThemeData(textColor: Colors.black, iconColor: Colors.black));
+            
   }
 }

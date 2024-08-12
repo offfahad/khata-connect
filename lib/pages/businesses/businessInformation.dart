@@ -369,7 +369,10 @@ class _BusinessInformationState extends State<BusinessInformation> {
           title: Text(AppLocalizations.of(context)!.translate('businessInfo')),
           actions: [
             IconButton(
-              icon: const Icon(Icons.picture_as_pdf, color: Colors.red,),
+              icon: const Icon(
+                Icons.picture_as_pdf,
+                color: Colors.red,
+              ),
               onPressed: downloadPdf,
             ),
           ],
@@ -396,80 +399,82 @@ class _BusinessInformationState extends State<BusinessInformation> {
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      initialValue: _businessInfo!.companyName,
-                      decoration:
-                          const InputDecoration(labelText: 'Company Name'),
-                      onSaved: (value) => _businessInfo!.companyName = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.name,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                      onSaved: (value) => _businessInfo!.name = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.role,
-                      decoration: const InputDecoration(labelText: 'Role'),
-                      onSaved: (value) => _businessInfo!.role = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.phone,
-                      decoration: const InputDecoration(labelText: 'Phone'),
-                      onSaved: (value) => _businessInfo!.phone = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.address,
-                      decoration: const InputDecoration(labelText: 'Address'),
-                      onSaved: (value) => _businessInfo!.address = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.email,
-                      decoration: const InputDecoration(labelText: 'Email'),
-                      onSaved: (value) => _businessInfo!.email = value,
-                    ),
-                    TextFormField(
-                      initialValue: _businessInfo!.website,
-                      decoration: const InputDecoration(labelText: 'Website'),
-                      onSaved: (value) => _businessInfo!.website = value,
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity, // Full width button
-                      height: 50, // Increase height as needed
-                      child: ElevatedButton(
-                        onPressed: () => getImageFrom('gallery'),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                8.0), // Adjust border radius for rectangular shape
-                          ),
-                        ),
-                        child: const Text('Select Logo'),
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        initialValue: _businessInfo!.companyName,
+                        decoration:
+                            const InputDecoration(labelText: 'Company Name'),
+                        onSaved: (value) => _businessInfo!.companyName = value,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _savingCompany
-                        ? const CircularProgressIndicator()
-                        : SizedBox(
-                            width: double.infinity, // Full width button
-                            height: 50, // Increase height as needed
-                            child: ElevatedButton(
-                              onPressed: updateBusinessInformation,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      8.0), // Adjust border radius for rectangular shape
-                                ),
-                              ),
-                              child: Text(AppLocalizations.of(context)!
-                                  .translate('Save')),
+                      TextFormField(
+                        initialValue: _businessInfo!.name,
+                        decoration: const InputDecoration(labelText: 'Name'),
+                        onSaved: (value) => _businessInfo!.name = value,
+                      ),
+                      TextFormField(
+                        initialValue: _businessInfo!.role,
+                        decoration: const InputDecoration(labelText: 'Role'),
+                        onSaved: (value) => _businessInfo!.role = value,
+                      ),
+                      TextFormField(
+                        initialValue: _businessInfo!.phone,
+                        decoration: const InputDecoration(labelText: 'Phone'),
+                        onSaved: (value) => _businessInfo!.phone = value,
+                      ),
+                      TextFormField(
+                        initialValue: _businessInfo!.address,
+                        decoration: const InputDecoration(labelText: 'Address'),
+                        onSaved: (value) => _businessInfo!.address = value,
+                      ),
+                      TextFormField(
+                        initialValue: _businessInfo!.email,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        onSaved: (value) => _businessInfo!.email = value,
+                      ),
+                      TextFormField(
+                        initialValue: _businessInfo!.website,
+                        decoration: const InputDecoration(labelText: 'Website'),
+                        onSaved: (value) => _businessInfo!.website = value,
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity, // Full width button
+                        height: 50, // Increase height as needed
+                        child: ElevatedButton(
+                          onPressed: () => getImageFrom('gallery'),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8.0), // Adjust border radius for rectangular shape
                             ),
                           ),
-                  ],
+                          child: const Text('Select Logo'),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _savingCompany
+                          ? const CircularProgressIndicator()
+                          : SizedBox(
+                              width: double.infinity, // Full width button
+                              height: 50, // Increase height as needed
+                              child: ElevatedButton(
+                                onPressed: updateBusinessInformation,
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        8.0), // Adjust border radius for rectangular shape
+                                  ),
+                                ),
+                                child: Text(AppLocalizations.of(context)!
+                                    .translate('Save')),
+                              ),
+                            ),
+                    ],
+                  ),
                 ),
               ),
             );

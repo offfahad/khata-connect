@@ -281,7 +281,7 @@ class _CustomersState extends State<Customers> {
           final total = snapshot.data!;
           final ttype = total.isNegative ? "credit" : "payment";
           return SizedBox(
-            width: 80, // Set a fixed width for the trailing widget
+            width: 130, // Set a fixed width for the trailing widget
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -295,6 +295,7 @@ class _CustomersState extends State<Customers> {
                         fontSize: 16,
                         color: ttype == 'payment' ? Colors.green : Colors.red,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

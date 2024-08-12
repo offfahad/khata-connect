@@ -47,9 +47,9 @@ class _AddCustomerState extends State<AddCustomer> {
       final snackBar = SnackBar(
         content: Row(
           children: <Widget>[
-            Icon(Icons.warning, color: Colors.redAccent),
+            const Icon(Icons.warning, color: Colors.redAccent),
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 0, 0, 0),
+              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
               child: Text(
                   AppLocalizations.of(context)!.translate('imageSizeError')),
             ),
@@ -76,7 +76,7 @@ class _AddCustomerState extends State<AddCustomer> {
           backgroundColor: Colors.transparent,
           title: Text(
             AppLocalizations.of(context)!.translate('addCustomer'),
-            style: TextStyle(
+            style: const TextStyle(
               //color: Colors.black,
               fontSize: 18,
             ),
@@ -86,7 +86,7 @@ class _AddCustomerState extends State<AddCustomer> {
             TextButton.icon(
               label: Text(
                 AppLocalizations.of(context)!.translate('importContacts'),
-                style: TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 12),
               ),
               icon: const Icon(
                 Icons.control_point,
@@ -96,7 +96,7 @@ class _AddCustomerState extends State<AddCustomer> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ImportContacts()),
+                  MaterialPageRoute(builder: (context) => const ImportContacts()),
                 );
               },
             ),
@@ -104,22 +104,22 @@ class _AddCustomerState extends State<AddCustomer> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: addCustomer,
-          icon: Icon(Icons.check),
+          icon: const Icon(Icons.check),
           label: Text(AppLocalizations.of(context)!.translate('addCustomer')),
         ),
         body: SingleChildScrollView(
           child: Container(
-            margin: EdgeInsets.fromLTRB(0, 0, 0, 48),
-            padding: EdgeInsets.all(20),
+            margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
+            padding: const EdgeInsets.all(20),
             child: Form(
               key: _formKey,
               child: Column(
                 children: <Widget>[
                   customerImageWidget(),
-                  SizedBox(height: 25,),
+                  const SizedBox(height: 25,),
                   TextFormField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.person),
+                      icon: const Icon(Icons.person),
                       hintText: AppLocalizations.of(context)!
                           .translate('customerNameLabelMeta'),
                       labelText: AppLocalizations.of(context)!
@@ -136,7 +136,7 @@ class _AddCustomerState extends State<AddCustomer> {
                   ),
                   TextFormField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.call_missed_outgoing),
+                      icon: const Icon(Icons.call_missed_outgoing),
                       hintText: AppLocalizations.of(context)!
                           .translate('customerPhoneLabelMeta'),
                       labelText: AppLocalizations.of(context)!
@@ -153,7 +153,7 @@ class _AddCustomerState extends State<AddCustomer> {
                   ),
                   TextFormField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.location_city),
+                      icon: const Icon(Icons.location_city),
                       hintText: AppLocalizations.of(context)!
                           .translate('customerAddressLabelMeta'),
                       labelText: AppLocalizations.of(context)!
@@ -162,7 +162,7 @@ class _AddCustomerState extends State<AddCustomer> {
                     validator: null,
                     onSaved: (input) => _address = input,
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.all(36),
                   ),
                 ],
@@ -183,7 +183,7 @@ class _AddCustomerState extends State<AddCustomer> {
               : Image.file(_image!, width: 60),
         ),
         Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: TextButton(
             onPressed: showUploadDialog,
             child: Text(
@@ -204,7 +204,7 @@ class _AddCustomerState extends State<AddCustomer> {
           children: <Widget>[
             SimpleDialogOption(
               child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Text(AppLocalizations.of(context)!
                     .translate('uploadFromCamera')),
               ),
@@ -215,7 +215,7 @@ class _AddCustomerState extends State<AddCustomer> {
             ),
             SimpleDialogOption(
               child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Text(AppLocalizations.of(context)!
                     .translate('uploadFromGallery')),
               ),

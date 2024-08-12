@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:khata_connect/database/businessRepo.dart';
 import 'package:khata_connect/models/business.dart';
 
-
 class BusinessBloc {
   final _businessRepository = BusinessRepository();
 
@@ -22,7 +21,7 @@ class BusinessBloc {
     return businesss;
   }
 
-  Future<Business>getBusiness(int id) async {
+  Future<Business> getBusiness(int id) async {
     final Business? business = await _businessRepository.getBusiness(id);
     return business!;
   }

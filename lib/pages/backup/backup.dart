@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +17,7 @@ class Backup extends StatefulWidget {
 class _BackupState extends State<Backup> {
   bool _absorbing = true;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  
 
   @override
   void initState() {
@@ -27,8 +27,7 @@ class _BackupState extends State<Backup> {
 
   Future<void> _initFirebase() async {
     await Firebase.initializeApp(
-      options:
-          DefaultFirebaseOptions.currentPlatform, // Use the generated options
+      options: DefaultFirebaseOptions.currentPlatform, // Use the generated options
     );
   }
 
@@ -51,100 +50,93 @@ class _BackupState extends State<Backup> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: Colors.white,
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.translate('backupInfo'),
-              style: Theme.of(context).textTheme.displayLarge),
+          title: Text(AppLocalizations.of(context)!.translate('backupInfo')),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
           elevation: 0,
-          backgroundColor: Colors.grey.shade100,
+          backgroundColor: Colors.transparent,
         ),
         body: Stack(
           children: [
             Container(
               padding: const EdgeInsets.all(24),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   const Image(
                     image: AssetImage("assets/images/data-copy.jpg"),
                     width: 300,
                   ),
-                  Column(
-                    children: <Widget>[
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.restore),
-                        onPressed: () async {
-                          setState(() {
-                            _absorbing = true;
-                          });
-                          bool restored =
-                              await FirebaseBackup().restoreAllData();
-
-                          if (restored) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                AppLocalizations.of(context)!
-                                    .translate('backupRestored'),
-                              ),
-                            ));
-                          }
-
-                          setState(() {
-                            _absorbing = false;
-                          });
-                        },
-                        label: Text(AppLocalizations.of(context)!
-                            .translate('restoreNow')),
-                      ),
-                      const SizedBox(
-                        height: 8,
-                      ),
-                      ElevatedButton.icon(
-                        icon: const Icon(
-                          Icons.restore,
-                          color: Colors.white,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: xDarkBlue,
-                        ),
-                        onPressed: () async {
-                          setState(() {
-                            _absorbing = true;
-                          });
-
-                          bool res = await FirebaseBackup().backupAllData();
-                          if (res) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(
-                                AppLocalizations.of(context)!
-                                    .translate('backupDone'),
-                              ),
-                            ));
-                          }
-
-                          setState(() {
-                            _absorbing = false;
-                          });
-                        },
-                        label: Text(
-                          AppLocalizations.of(context)!
-                              .translate('backupToTheCloud'),
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 24,
-                      ),
-                    ],
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.restore),
+                    onPressed: () async {
+                      setState(() {
+                        _absorbing = true;
+                      });
+                      bool restored = await FirebaseBackup().restoreAllData();
+                      
+                      if (restored) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.translate('backupRestored'),
+                          ),
+                        ));
+                      }
+                      setState(() {
+                        _absorbing = false;
+                      });
+                      setState(() {
+                        
+                      });
+                    },
+                    label: Text(AppLocalizations.of(context)!.translate('restoreNow')),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50), // Make buttons expand
+                    ),
                   ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.cloud_upload),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: xDarkBlue,
+                      minimumSize: const Size.fromHeight(50), // Make buttons expand
+                    ),
+                    onPressed: () async {
+                      setState(() {
+                        _absorbing = true;
+                      });
+
+                      bool res = await FirebaseBackup().backupAllData();
+                      if (res) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                            AppLocalizations.of(context)!.translate('backupDone'),
+                          ),
+                        ));
+                      }
+
+                      setState(() {
+                        _absorbing = false;
+                      });
+                      setState(() {
+                        
+                      });
+                    },
+                    label: Text(
+                      AppLocalizations.of(context)!.translate('backupToTheCloud'),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -153,7 +145,9 @@ class _BackupState extends State<Backup> {
                 absorbing: _absorbing,
                 child: Center(
                   child: LoadingAnimationWidget.fourRotatingDots(
-                      color: Theme.of(context).colorScheme.secondary, size: 60),
+                    color: Theme.of(context).colorScheme.secondary,
+                    size: 60,
+                  ),
                 ),
               ),
           ],

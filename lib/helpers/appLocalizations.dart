@@ -51,7 +51,8 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale('en', ''),
-      Locale('ne', ''),
+      Locale('ur', ''),
+      //Locale('ne', ''),
     ];
   }
 
