@@ -20,5 +20,6 @@
 ---
 
 With Khata Connect, managing your small business has never been easier. Keep your transactions organized, generate reports, and maintain customer data with confidence.
+
 ![UI-Demo-Image](https://github.com/user-attachments/assets/d689c6eb-7053-44ed-a20e-a6cabde71c19)
 
