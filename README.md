@@ -1,16 +1,24 @@
-# khata_connect
+# Khata Connect
 
-A new Flutter project.
+**Khata Connect** is a comprehensive debit and credit management app developed in Flutter, designed specifically for small shopkeepers and businesses to manage their daily transactions efficiently.
 
-## Getting Started
+## Key Features
 
-This project is a starting point for a Flutter application.
+- **Credit Management (Khata)**: Easily track and manage credits and debits for your business.
+- **Tailored for Local Businesses**: Ideal for shopkeepers and small enterprises.
+- **Business Card Generator**: Create, download, and share your custom business card.
+- **Transaction Reports in PDF**: Export detailed transaction reports for all customers or specific individuals in PDF format.
+- **Multiple Business Support**: Seamlessly manage multiple businesses under one app.
+- **Custom Currency**: Choose and use your preferred currency for transactions.
+- **Multi-Calendar Support**: Supports both English and Urdu calendars for better flexibility.
+- **Multilingual Interface**: Available in both English and Urdu for a broader audience reach.
+- **Google Drive Backup and Restore**: Safeguard your data with cloud backups and easily restore from Google Drive.
+- **Contact Integration**: Import customers directly from your phone contacts.
+- **Local Database with Sqflite**: Utilize a local SQLite database for offline access to your transaction data.
+- **And Much More**: Continuously evolving with additional features and improvements.
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+With Khata Connect, managing your small business has never been easier. Keep your transactions organized, generate reports, and maintain customer data with confidence.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Khata Connect Image](https://github.com/user-attachments/assets/1d318c23-1591-4b99-8df1-aec1eada08cd)
