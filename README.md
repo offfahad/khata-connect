@@ -16,10 +16,28 @@
 - **Contact Integration**: Import customers directly from your phone contacts.
 - **Local Database with Sqflite**: Utilize a local SQLite database for offline access to your transaction data.
 - **And Much More**: Continuously evolving with additional features and improvements.
-
----
-
+- 
 With Khata Connect, managing your small business has never been easier. Keep your transactions organized, generate reports, and maintain customer data with confidence.
 
 ![UI-Demo-Image](https://github.com/user-attachments/assets/d689c6eb-7053-44ed-a20e-a6cabde71c19)
+
+# Veriosn 2
+
+**LINK** https://github.com/offfahad/khata-connect-chatting-app
+
+## Features Added
+
+- Firebase Realtime Database
+- Push Notifications For Instant Updates
+- Realtime Chatting Functionality
+- Online/Offine With Seen and Delieverd
+- Edit and Delete Debit and Credit Transactions
+- AI Chatbot
+
+# UI Design 
+
+![IMG-20241115-WA0009-imageonline co-merged (1)-imageonline co-merged](https://github.com/user-attachments/assets/b7d54d68-7384-4653-9a9b-dacbcec958fb)
+
+
+
 
