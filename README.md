@@ -1,6 +1,6 @@
 # Khata Connect
 
-**Khata Connect** is a similar to easy-khata mobile application. With this app, you can easily record transactions that you have done with your customers. It is a comprehensive debit and credit management app developed in Flutter, designed specifically for small shopkeepers and businesses to manage their daily transactions efficiently.
+**Khata Connect** is a similar to easy-khata mobile application. With this app, you can easily record transactions that you have done with your customers. It is a comprehensive debit and credit management app developed in Flutter, designed specifically for small shopkeepers and businesses to manage their daily transactions efficiently. It contains two versions with two repositories.
 
 ## Key Features
 
