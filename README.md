@@ -16,7 +16,7 @@
 - **Contact Integration**: Import customers directly from your phone contacts.
 - **Local Database with Sqflite**: Utilize a local SQLite database for offline access to your transaction data.
 - **And Much More**: Continuously evolving with additional features and improvements.
-- 
+
 With Khata Connect, managing your small business has never been easier. Keep your transactions organized, generate reports, and maintain customer data with confidence.
 
 ![UI-Demo-Image](https://github.com/user-attachments/assets/d689c6eb-7053-44ed-a20e-a6cabde71c19)
