@@ -36,29 +36,19 @@ dependencies:
   path_provider: 
   autocomplete_textfield:
   image_picker: 
-  firebase_core: 
-  firebase_analytics: 
-  firebase_auth: 
-  firebase_storage: 
-  cloud_firestore: 
   http: 
-  google_sign_in: 
   path: 
   url_launcher: 
   pdf: 
   intl: 
   open_file: 
   share: 
-  cron: 
-  #background_fetch: 
   shared_preferences: 
   provider: 
   back_button_interceptor: 
   contacts_service: 
   permission_handler: 
   flutter_platform_widgets:
-  nepali_utils: 
-  nepali_date_picker: 
   flutter_native_image: 
   flutter_launcher_icons: 
   loading_animation_widget:

@@ -14,15 +14,15 @@ import '../customers/singleCustomer.dart';
 class SingleTransaction extends StatefulWidget {
   final int transactionId;
 
-  SingleTransaction(this.transactionId, {Key? key}) : super(key: key);
+  const SingleTransaction(this.transactionId, {super.key});
 
   @override
-  _SingleTransactionState createState() => _SingleTransactionState();
+  State<SingleTransaction> createState() => _SingleTransactionState();
 }
 
 class _SingleTransactionState extends State<SingleTransaction> {
-  final TransactionBloc transactionBloc = TransactionBloc();
-  final CustomerBloc customerBloc = CustomerBloc();
+  final TransactionBloc _transactionBloc = TransactionBloc();
+  final CustomerBloc _customerBloc = CustomerBloc();
 
   void _showDeleteDialog(Transaction transaction) {
     showDialog(
@@ -36,20 +36,20 @@ class _SingleTransactionState extends State<SingleTransaction> {
           actions: <Widget>[
             TextButton(
               child: Text(AppLocalizations.of(context)!.translate('closeText')),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
               child: Text(
                 AppLocalizations.of(context)!.translate('deleteText'),
-                style: const TextStyle(
-                    //color: Colors.white,
-                    ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onError,
+                ),
               ),
               onPressed: () {
-                transactionBloc.deleteTransactionById(transaction.id!);
+                _transactionBloc.deleteTransactionById(transaction.id!);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
@@ -68,199 +68,257 @@ class _SingleTransactionState extends State<SingleTransaction> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final colorScheme = theme.colorScheme;
+
     return FutureBuilder<Transaction>(
-      future: transactionBloc.getTransaction(widget.transactionId),
+      future: _transactionBloc.getTransaction(widget.transactionId),
       builder: (BuildContext context, AsyncSnapshot<Transaction> snapshot) {
         if (snapshot.hasData) {
-          Transaction transaction = snapshot.data!;
-
+          final transaction = snapshot.data!;
           Uint8List? transactionAttachment;
+
           if (transaction.attachment != null) {
             transactionAttachment =
                 const Base64Decoder().convert(transaction.attachment!);
           }
 
-          return SafeArea(
-            child: Scaffold(
-              appBar: AppBar(
-                elevation: 0.0,
-                backgroundColor: Colors.transparent,
-                title: null,
-                iconTheme: const IconThemeData(
-                    //color: Colors.black,
-                    ),
-                actions: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.edit,
-                        size: 20.0, color: Colors.purple),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditTransaction(transaction),
-                        ),
-                      );
-                    },
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.delete, size: 20.0, color: Colors.red),
-                    onPressed: () {
-                      _showDeleteDialog(transaction);
-                    },
-                  ),
-                ],
-              ),
-              body: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              getTransactionCustomer(transaction),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Row(
-                                children: <Widget>[
-                                  transaction.ttype == 'credit'
-                                      ? Chip(
-                                          label: Text(
-                                              AppLocalizations.of(context)!
-                                                  .translate('creditGiven')),
-                                          //backgroundColor:
-                                          //   Colors.orange.shade100,
-                                          avatar: Icon(Icons.arrow_upward,
-                                              color: Colors.orange.shade900,
-                                              size: 20.0),
-                                        )
-                                      : Chip(
-                                          label: Text(AppLocalizations.of(
-                                                  context)!
-                                              .translate('paymentReceived')),
-                                          //backgroundColor:
-                                          //  Colors.orange.shade100,
-                                          avatar: Icon(Icons.arrow_downward,
-                                              color: Colors.green.shade900,
-                                              size: 20.0),
-                                        ),
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(16, 0, 0, 0),
-                                    child: Text(
-                                      amountFormat(
-                                          context, transaction.amount!.abs()),
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Divider(
-                                //color: Colors.grey.shade300,
-                                height: 36,
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.9,
-                                child: Text(
-                                  transaction.comment!,
-                                  softWrap: true,
-                                  textAlign: TextAlign.left,
-                                  
-                                  style: const TextStyle(
-                                    //color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.9,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 36, 0, 36),
-                                    child: transactionAttachment != null
-                                        ? Image.memory(transactionAttachment!,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.8,
-                                            fit: BoxFit.cover)
-                                        : Container(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+          return Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              forceMaterialTransparency: true,
+              centerTitle: false,
+              title: Text(
+                AppLocalizations.of(context)!.translate('transactionDetails'),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
                 ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 24),
+                  color: colorScheme.primary,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditTransaction(transaction),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 24),
+                  color: colorScheme.error,
+                  onPressed: () => _showDeleteDialog(transaction),
+                ),
+              ],
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  // Customer and date section
+                  Center(child: _buildCustomerInfo(transaction)),
+                  const SizedBox(height: 24),
+
+                  // Transaction type and amount
+                  _buildTransactionTypeAndAmount(context, transaction),
+                  const SizedBox(height: 24),
+
+                  // Divider
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: colorScheme.outlineVariant,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // // Comment section
+                  // if (transaction.comment != null &&
+                  //     transaction.comment!.isNotEmpty)
+                  _buildCommentSection(transaction, colorScheme),
+                  if (transaction.comment != null &&
+                      transaction.comment!.isNotEmpty)
+                    const SizedBox(height: 24),
+
+                  // Attachment section
+                  if (transactionAttachment != null)
+                    _buildAttachmentSection(transactionAttachment, context),
+                ],
               ),
             ),
           );
         }
 
-        return const Center(child: CircularProgressIndicator());
+        return Center(
+          child: CircularProgressIndicator(
+            color: colorScheme.primary,
+          ),
+        );
       },
     );
   }
 
-  Widget getTransactionCustomer(Transaction transaction) {
+  Widget _buildCustomerInfo(Transaction transaction) {
     return FutureBuilder<Customer>(
-      future: customerBloc.getCustomer(transaction.uid!),
+      future: _customerBloc.getCustomer(transaction.uid!),
       builder: (BuildContext context, AsyncSnapshot<Customer> snapshot) {
         if (snapshot.hasData) {
-          Customer customer = snapshot.data!;
+          final customer = snapshot.data!;
+          final colorScheme = Theme.of(context).colorScheme;
+
           return Row(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 4, 12, 4),
-                child: CircleAvatar(
-                  backgroundColor: Colors.purple.shade500,
-                  child: Icon(Icons.person,
-                      color: Colors.purple.shade100, size: 20.0),
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person,
+                  size: 24,
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
-              Row(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: Text(customer.name!,
-                        style: const TextStyle(
-                          //color: Colors.black87,
-                          fontSize: 18,
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                    child: Text(
-                      "${transaction.date!.day}/${transaction.date!.month}/${transaction.date!.year}",
-                      style: const TextStyle(
-                        //color: Colors.black45,
-                        fontSize: 14,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer.name!,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
                       ),
                     ),
-                  ),
-                ],
-              )
+                    const SizedBox(height: 4),
+                    Text(
+                      "${transaction.date!.day}/${transaction.date!.month}/${transaction.date!.year}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           );
         }
-        return Container();
+        return const SizedBox.shrink();
       },
+    );
+  }
+
+  Widget _buildTransactionTypeAndAmount(
+      BuildContext context, Transaction transaction) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isCredit = transaction.ttype == 'credit';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isCredit
+                      ? colorScheme.errorContainer
+                      : colorScheme.tertiaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isCredit ? Icons.arrow_upward : Icons.arrow_downward,
+                  size: 20,
+                  color: isCredit
+                      ? colorScheme.onErrorContainer
+                      : colorScheme.onTertiaryContainer,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                AppLocalizations.of(context)!.translate(
+                  isCredit ? 'creditGiven' : 'paymentReceived',
+                ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            width: 20,
+          ),
+          Flexible(
+            child: Text(
+              amountFormat(context, transaction.amount!.abs()),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isCredit ? colorScheme.error : colorScheme.tertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentSection(
+      Transaction transaction, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            transaction.comment!,
+            style: TextStyle(
+              fontSize: 16,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttachmentSection(
+      Uint8List transactionAttachment, BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.memory(
+            transactionAttachment,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ],
     );
   }
 
   @override
   void dispose() {
+    _transactionBloc.dispose();
+    _customerBloc.dispose();
     super.dispose();
   }
 }

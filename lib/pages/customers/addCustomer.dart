@@ -13,8 +13,10 @@ import '../../helpers/appLocalizations.dart';
 import '../../models/customer.dart';
 
 class AddCustomer extends StatefulWidget {
+  const AddCustomer({super.key});
+
   @override
-  _AddCustomerState createState() => _AddCustomerState();
+  State<AddCustomer> createState() => _AddCustomerState();
 }
 
 class _AddCustomerState extends State<AddCustomer> {
@@ -25,7 +27,7 @@ class _AddCustomerState extends State<AddCustomer> {
   String? _name, _phone, _address;
   File? _image;
   final ImagePicker _picker = ImagePicker();
-  Customer _customer = Customer();
+  final Customer _customer = Customer();
 
   Future<void> getImageFrom(String from) async {
     final XFile? image = from == 'camera'
@@ -55,6 +57,10 @@ class _AddCustomerState extends State<AddCustomer> {
             ),
           ],
         ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
@@ -67,106 +73,173 @@ class _AddCustomerState extends State<AddCustomer> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        //backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            AppLocalizations.of(context)!.translate('addCustomer'),
-            style: const TextStyle(
-              //color: Colors.black,
-              fontSize: 18,
-            ),
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        title: Text(
+          AppLocalizations.of(context)!.translate('addCustomer'),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
-          //iconTheme: IconThemeData(color: Colors.black),
-          actions: <Widget>[
-            TextButton.icon(
+        ),
+        centerTitle: false,
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: theme.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(color: theme.colorScheme.secondary),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              ),
               label: Text(
                 AppLocalizations.of(context)!.translate('importContacts'),
-                style: const TextStyle(fontSize: 12),
-              ),
-              icon: const Icon(
-                Icons.control_point,
-                size: 20.0,
-                //color: Colors.blue,
+                style: const TextStyle(fontSize: 14),
               ),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ImportContacts()),
+                  MaterialPageRoute(
+                      builder: (context) => const ImportContacts()),
                 );
               },
             ),
-          ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: addCustomer,
+        icon: const Icon(
+          Icons.check,
+          color: Colors.white,
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: addCustomer,
-          icon: const Icon(Icons.check),
-          label: Text(AppLocalizations.of(context)!.translate('addCustomer')),
+        label: Text(
+          AppLocalizations.of(context)!.translate('addCustomer'),
+          style: const TextStyle(color: Colors.white),
         ),
-        body: SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  customerImageWidget(),
-                  const SizedBox(height: 25,),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      icon: const Icon(Icons.person),
-                      hintText: AppLocalizations.of(context)!
-                          .translate('customerNameLabelMeta'),
-                      labelText: AppLocalizations.of(context)!
-                          .translate('customerNameLabel'),
-                    ),
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return AppLocalizations.of(context)!
-                            .translate('customerNameError');
-                      }
-                      return null;
-                    },
-                    onSaved: (input) => _name = input,
+        backgroundColor: theme.primaryColor,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 16),
+                customerImageWidget(),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: isDarkMode
+                        ? theme.colorScheme.surface.withOpacity(0.5)
+                        : theme.colorScheme.surface,
+                    boxShadow: isDarkMode
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
                   ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      icon: const Icon(Icons.call_missed_outgoing),
-                      hintText: AppLocalizations.of(context)!
-                          .translate('customerPhoneLabelMeta'),
-                      labelText: AppLocalizations.of(context)!
-                          .translate('customerPhoneLabel'),
-                    ),
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return AppLocalizations.of(context)!
-                            .translate('customerPhoneError');
-                      }
-                      return null;
-                    },
-                    onSaved: (input) => _phone = input,
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.person,
+                              color: theme.colorScheme.secondary),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('customerNameLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('customerNameLabel'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: theme.cardColor,
+                        ),
+                        style:
+                            TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return AppLocalizations.of(context)!
+                                .translate('customerNameError');
+                          }
+                          return null;
+                        },
+                        onSaved: (input) => _name = input,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.phone,
+                              color: theme.colorScheme.secondary),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('customerPhoneLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('customerPhoneLabel'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: theme.cardColor,
+                        ),
+                        style:
+                            TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return AppLocalizations.of(context)!
+                                .translate('customerPhoneError');
+                          }
+                          return null;
+                        },
+                        onSaved: (input) => _phone = input,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.location_on,
+                              color: theme.colorScheme.secondary),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('customerAddressLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('customerAddressLabel'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: theme.cardColor,
+                        ),
+                        style:
+                            TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        validator: null,
+                        onSaved: (input) => _address = input,
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      icon: const Icon(Icons.location_city),
-                      hintText: AppLocalizations.of(context)!
-                          .translate('customerAddressLabelMeta'),
-                      labelText: AppLocalizations.of(context)!
-                          .translate('customerAddressLabel'),
-                    ),
-                    validator: null,
-                    onSaved: (input) => _address = input,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(36),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
           ),
         ),
@@ -175,58 +248,156 @@ class _AddCustomerState extends State<AddCustomer> {
   }
 
   Widget customerImageWidget() {
-    return Row(
-      children: <Widget>[
-        Center(
-          child: _image == null
-              ? Image.asset('assets/images/noimage_person.png', width: 60)
-              : Image.file(_image!, width: 60),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: TextButton(
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.secondary.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _image == null
+                      ? Image.asset(
+                          'assets/images/noimage_person.png',
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          _image!,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: showUploadDialog,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextButton(
             onPressed: showUploadDialog,
             child: Text(
-                AppLocalizations.of(context)!.translate('customerImageLabel')),
+              AppLocalizations.of(context)!.translate('customerImageLabel'),
+              style: TextStyle(
+                color: theme.colorScheme.secondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   void showUploadDialog() {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(
-              AppLocalizations.of(context)!.translate('customerImageLabel')),
-          children: <Widget>[
-            SimpleDialogOption(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromCamera')),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: theme.cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Update Image',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('camera');
-              },
-            ),
-            SimpleDialogOption(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromGallery')),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        Icons.camera_alt,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      label: Text(
+                        'From Camera',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: theme.dividerColor),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        getImageFrom('camera');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(
+                        Icons.photo_library,
+                        color: Colors.white,
+                      ),
+                      label: const Text('From Gallery'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        getImageFrom('gallery');
+                      },
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('gallery');
-              },
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 

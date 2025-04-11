@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/helpers/conversion.dart';
-import 'package:nepali_date_picker/nepali_date_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../blocs/customerBloc.dart';
@@ -46,63 +45,30 @@ class _EditTransactionState extends State<EditTransaction> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _selectDate(BuildContext context) async {
-    String lang =
-        Provider.of<AppStateNotifier>(context, listen: false).appLocale;
-
-    if (lang == 'ne') {
-      NepaliDateTime? _nepaliDateTime = await showMaterialDatePicker(
-        context: context,
-        initialDate: _date.toNepaliDateTime(),
-        firstDate: NepaliDateTime(2000),
-        lastDate: NepaliDateTime(2090),
-        initialDatePickerMode: DatePickerMode.day,
-        builder: (BuildContext context, Widget? child) {
-          return Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: ColorScheme.dark(
-                primary: Theme.of(context).colorScheme.secondary,
-                onPrimary: Colors.white,
-                surface: Colors.green.shade500,
-                onSurface: Colors.white,
-              ),
-              dialogBackgroundColor: Theme.of(context).primaryColor,
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2015, 8),
+      lastDate: DateTime(2030, 8),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: Theme.of(context).colorScheme.secondary,
+              onPrimary: Colors.white,
+              surface: Colors.green.shade500,
+              onSurface: Colors.white,
             ),
-            child: child!,
-          );
-        },
-      );
-
-      if (_nepaliDateTime != null) {
-        final DateTime picked = _nepaliDateTime.toDateTime();
-        setState(() {
-          _date = picked.subtract(const Duration(days: 1));
-        });
-      }
-    } else {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2030, 8),
-        builder: (BuildContext context, Widget? child) {
-          return Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: ColorScheme.dark(
-                primary: Theme.of(context).colorScheme.secondary,
-                onPrimary: Colors.white,
-                surface: Colors.green.shade500,
-                onSurface: Colors.white,
-              ),
-              dialogBackgroundColor: Theme.of(context).primaryColor,
-            ),
-            child: child!,
-          );
-        },
-      );
-      if (picked != null && picked != _date)
-        setState(() {
-          _date = picked;
-        });
+            dialogBackgroundColor: Theme.of(context).primaryColor,
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _date) {
+      setState(() {
+        _date = picked;
+      });
     }
   }
 
@@ -176,190 +142,189 @@ class _EditTransactionState extends State<EditTransaction> {
             });
           }
 
-          return SafeArea(
-            child: Scaffold(
-              //backgroundColor: Colors.white,
-              key: _scaffoldKey,
-              appBar: AppBar(
-                elevation: 0.0,
-                backgroundColor: Colors.transparent,
-                title: Text(
-                  AppLocalizations.of(context)!.translate('editTransaction'),
-                  style: const TextStyle(
-                      //color: Colors.black,
-                      ),
-                ),
-                iconTheme: const IconThemeData(
+          return Scaffold(
+            //backgroundColor: Colors.white,
+            key: _scaffoldKey,
+            appBar: AppBar(
+              elevation: 0.0,
+              forceMaterialTransparency: true,
+              title: Text(
+                AppLocalizations.of(context)!.translate('editTransaction'),
+                style: const TextStyle(
                     //color: Colors.black,
                     ),
               ),
-              floatingActionButton: FloatingActionButton.extended(
-                onPressed: () {
-                  updateTransaction(argTransaction);
-                },
-                icon: const Icon(Icons.check),
-                label: Text(
-                    AppLocalizations.of(context)!.translate('editTransaction')),
-              ),
-              body: SingleChildScrollView(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
-                  padding: const EdgeInsets.all(20),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                ActionChip(
-                                    backgroundColor: _transType == "credit"
-                                        ? Colors.green.shade500
-                                        : Colors.black38,
-                                    avatar: CircleAvatar(
-                                      backgroundColor: Colors.grey.shade200,
-                                      child: const Icon(
-                                        Icons.send,
-                                        color: Colors.blueAccent,
-                                        size: 16.0,
-                                      ),
+              iconTheme: const IconThemeData(
+                  //color: Colors.black,
+                  ),
+            ),
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: () {
+                updateTransaction(argTransaction);
+              },
+              icon: const Icon(Icons.check),
+              label: Text(
+                  AppLocalizations.of(context)!.translate('editTransaction')),
+            ),
+            body: SingleChildScrollView(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Column(
+                            children: <Widget>[
+                              ActionChip(
+                                  backgroundColor: _transType == "credit"
+                                      ? Colors.green.shade500
+                                      : Colors.black38,
+                                  avatar: CircleAvatar(
+                                    backgroundColor: Colors.grey.shade200,
+                                    child: const Icon(
+                                      Icons.send,
+                                      color: Colors.blueAccent,
+                                      size: 16.0,
                                     ),
-                                    label: Text(AppLocalizations.of(context)!
-                                        .translate('creditGiven')),
-                                    onPressed: () {
-                                      setState(() {
-                                        _transType = "credit";
-                                      });
-                                    })
-                              ],
-                            ),
-                            const Padding(padding: EdgeInsets.all(8.0)),
-                            Column(
-                              children: <Widget>[
-                                ActionChip(
-                                    backgroundColor: _transType == "payment"
-                                        ? Colors.green.shade500
-                                        : Colors.black38,
-                                    avatar: CircleAvatar(
-                                      backgroundColor: Colors.grey.shade200,
-                                      child: const Icon(
-                                        Icons.receipt,
-                                        color: Colors.redAccent,
-                                        size: 16.0,
-                                      ),
+                                  ),
+                                  label: Text(AppLocalizations.of(context)!
+                                      .translate('creditGiven')),
+                                  onPressed: () {
+                                    setState(() {
+                                      _transType = "credit";
+                                    });
+                                  })
+                            ],
+                          ),
+                          const Padding(padding: EdgeInsets.all(8.0)),
+                          Column(
+                            children: <Widget>[
+                              ActionChip(
+                                  backgroundColor: _transType == "payment"
+                                      ? Colors.green.shade500
+                                      : Colors.black38,
+                                  avatar: CircleAvatar(
+                                    backgroundColor: Colors.grey.shade200,
+                                    child: const Icon(
+                                      Icons.receipt,
+                                      color: Colors.redAccent,
+                                      size: 16.0,
                                     ),
-                                    label: Text(AppLocalizations.of(context)!
-                                        .translate('paymentReceived')),
-                                    onPressed: () {
-                                      setState(() {
-                                        _transType = "payment";
-                                      });
-                                    })
-                              ],
-                            )
-                          ],
+                                  ),
+                                  label: Text(AppLocalizations.of(context)!
+                                      .translate('paymentReceived')),
+                                  onPressed: () {
+                                    setState(() {
+                                      _transType = "payment";
+                                    });
+                                  })
+                            ],
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      AutoCompleteTextField<Customer>(
+                        key: _customerSuggestionKey,
+                        clearOnSubmit: false,
+                        suggestions: customers,
+                        controller: _customersField,
+                        decoration: InputDecoration(
+                          icon: const Icon(Icons.person),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('customerNameLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('customerNameLabel'),
                         ),
-                        SizedBox(
-                          height: 5,
+                        itemFilter: (item, query) {
+                          _customerId = null;
+                          return item.name!
+                              .toLowerCase()
+                              .startsWith(query.toLowerCase());
+                        },
+                        itemSorter: (a, b) {
+                          return a.name!.compareTo(b.name!);
+                        },
+                        itemSubmitted: (item) {
+                          _customersField.text = item.name!;
+                          _customerId = item.id;
+                        },
+                        itemBuilder: (context, item) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(item.name!),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      TextFormField(
+                        initialValue: doubleWithoutDecimalToString(
+                            argTransaction.amount!),
+                        decoration: InputDecoration(
+                          icon: const Icon(Icons.monetization_on),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('transactionAmountLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('transactionAmountLabel'),
                         ),
-                        AutoCompleteTextField<Customer>(
-                          key: _customerSuggestionKey,
-                          clearOnSubmit: false,
-                          suggestions: customers,
-                          controller: _customersField,
-                          decoration: InputDecoration(
-                            icon: const Icon(Icons.person),
-                            hintText: AppLocalizations.of(context)!
-                                .translate('customerNameLabelMeta'),
-                            labelText: AppLocalizations.of(context)!
-                                .translate('customerNameLabel'),
-                          ),
-                          itemFilter: (item, query) {
-                            _customerId = null;
-                            return item.name!
-                                .toLowerCase()
-                                .startsWith(query.toLowerCase());
-                          },
-                          itemSorter: (a, b) {
-                            return a.name!.compareTo(b.name!);
-                          },
-                          itemSubmitted: (item) {
-                            _customersField.text = item.name!;
-                            _customerId = item.id;
-                          },
-                          itemBuilder: (context, item) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Text(item.name!),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        TextFormField(
-                          initialValue: doubleWithoutDecimalToString(
-                              argTransaction.amount!),
-                          decoration: InputDecoration(
-                            icon: const Icon(Icons.monetization_on),
-                            hintText: AppLocalizations.of(context)!
-                                .translate('transactionAmountLabelMeta'),
-                            labelText: AppLocalizations.of(context)!
-                                .translate('transactionAmountLabel'),
-                          ),
-                          validator: (input) {
-                            if (input == null || input.isEmpty) {
-                              return AppLocalizations.of(context)!
-                                  .translate('transactionAmountError');
-                            }
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return AppLocalizations.of(context)!
+                                .translate('transactionAmountError');
+                          }
 
-                            if (double.tryParse(input) == null) {
-                              return AppLocalizations.of(context)!
-                                  .translate('transactionAmountErrorNumber');
-                            }
-                            return null;
+                          if (double.tryParse(input) == null) {
+                            return AppLocalizations.of(context)!
+                                .translate('transactionAmountErrorNumber');
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.number,
+                        onSaved: (input) => _amount = double.parse(input!),
+                      ),
+                      TextFormField(
+                        initialValue: argTransaction.comment,
+                        decoration: InputDecoration(
+                          icon: const Icon(Icons.comment),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('transactionCommentLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('transactionCommentLabel'),
+                        ),
+                        maxLines: 3,
+                        onSaved: (input) => _comment = input,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 24, 8, 24),
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                              backgroundColor: Colors.grey),
+                          onPressed: () {
+                            _selectDate(context);
                           },
-                          keyboardType: TextInputType.number,
-                          onSaved: (input) => _amount = double.parse(input!),
-                        ),
-                        TextFormField(
-                          initialValue: argTransaction.comment,
-                          decoration: InputDecoration(
-                            icon: const Icon(Icons.comment),
-                            hintText: AppLocalizations.of(context)!
-                                .translate('transactionCommentLabelMeta'),
-                            labelText: AppLocalizations.of(context)!
-                                .translate('transactionCommentLabel'),
-                          ),
-                          maxLines: 3,
-                          onSaved: (input) => _comment = input,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 24, 8, 24),
-                          child: TextButton(
-                            style: TextButton.styleFrom(backgroundColor: Colors.grey),
-                            onPressed: () {
-                              _selectDate(context);
-                            },
-                            child: Row(
-                              children: <Widget>[
-                                Icon(
-                                  Icons.calendar_today,
-                                  //color: Colors.grey.shade600,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(formatDate(context, _date)['full']!),
-                              ],
-                            ),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.calendar_today,
+                                //color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(formatDate(context, _date)['full']!),
+                            ],
                           ),
                         ),
-                        transactionAttachmentWidget(argTransaction.attachment),
-                      ],
-                    ),
+                      ),
+                      transactionAttachmentWidget(argTransaction.attachment),
+                    ],
                   ),
                 ),
               ),

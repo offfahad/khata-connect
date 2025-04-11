@@ -1,14 +1,12 @@
 import 'dart:convert';
-
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:khata_connect/pages/messages/inbox.dart';
+
 import 'package:khata_connect/providers/my_theme_provider.dart';
 import 'package:khata_connect/services/loadBusinessInfo.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:khata_connect/firebase_options.dart';
+
 import 'package:khata_connect/helpers/appLocalizations.dart';
 import 'package:khata_connect/providers/stateNotifier.dart';
 import 'package:khata_connect/myTheme.dart';
@@ -21,7 +19,6 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MultiProvider(
       providers: [
@@ -126,183 +123,177 @@ class _MyHomePageState extends State<MyHomePage> {
       onWillPop: () async {
         return true;
       },
-      child: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Scaffold(
-              appBar: AppBar(
-                //iconTheme: IconThemeData(color: Colors.white),
-                backgroundColor: Colors.transparent,
-                title: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Image.asset('assets/images/logo.png', width: 30, height: 30,),
-                    const SizedBox(width: 10,),
-                    const Text(
-                      "Khata Connect",
-                      style: TextStyle(
-                          //color: Colors.grey,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-                elevation: 0,
-                //backgroundColor: Theme.of(context).colorScheme.primary,
-                actions: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: DropdownButton<Business>(
-                      value: _selectedBusiness,
-                      underline: const SizedBox(),
-                      onChanged: (Business? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedBusiness = newValue;
-                          });
-                          changeSelectedBusiness(context, newValue.id!);
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AddBusiness(),
+      child: Stack(
+        children: <Widget>[
+          Scaffold(
+            appBar: AppBar(
+              title: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  const Text(
+                    "Khata Connect",
+                    style: TextStyle(
+                        //color: Colors.grey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              elevation: 0,
+              forceMaterialTransparency: true,
+              //backgroundColor: Theme.of(context).colorScheme.primary,
+              actions: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButton<Business>(
+                    value: _selectedBusiness,
+                    underline: const SizedBox(),
+                    onChanged: (Business? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedBusiness = newValue;
+                        });
+                        changeSelectedBusiness(context, newValue.id!);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddBusiness(),
+                          ),
+                        );
+                      }
+                    },
+                    items: _businesses.map<DropdownMenuItem<Business>>(
+                      (Business? business) {
+                        if (business != null) {
+                          return DropdownMenuItem<Business>(
+                            value: business,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                children: [
+                                  business.logo!.isNotEmpty
+                                      ? CircleAvatar(
+                                          //backgroundColor: Colors.white,
+                                          radius: 15,
+                                          child: ClipOval(
+                                            child: Image.memory(
+                                              const Base64Decoder()
+                                                  .convert(business.logo!),
+                                              width: 30,
+                                              height: 30,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox(width: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    business.companyName!,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      //color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }
-                      },
-                      items: _businesses.map<DropdownMenuItem<Business>>(
-                        (Business? business) {
-                          if (business != null) {
-                            return DropdownMenuItem<Business>(
-                              value: business,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4),
-                                child: Row(
-                                  children: [
-                                    business.logo!.isNotEmpty
-                                        ? CircleAvatar(
-                                            //backgroundColor: Colors.white,
-                                            radius: 15,
-                                            child: ClipOval(
-                                              child: Image.memory(
-                                                const Base64Decoder()
-                                                    .convert(business.logo!),
-                                                width: 30,
-                                                height: 30,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          )
-                                        : const SizedBox(width: 16),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      business.companyName!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        //color: Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
+                        return DropdownMenuItem<Business>(
+                          value: business,
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                AppLocalizations.of(context)!
+                                    .translate('addRemoveBusiness'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            );
-                          }
-                          return DropdownMenuItem<Business>(
-                            value: business,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.add,
-                                  size: 18,
+                            ],
+                          ),
+                        );
+                      },
+                    ).toList()
+                      ..add(
+                        DropdownMenuItem<Business>(
+                          value: null,
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.add,
+                                size: 18,
+                                color: Colors.redAccent,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                AppLocalizations.of(context)!
+                                    .translate('addRemoveBusiness'),
+                                style: const TextStyle(
+                                  fontSize: 12,
                                   color: Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .translate('addRemoveBusiness'),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ).toList()
-                        ..add(
-                          DropdownMenuItem<Business>(
-                            value: null,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.add,
-                                  size: 18,
-                                  color: Colors.redAccent,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  AppLocalizations.of(context)!
-                                      .translate('addRemoveBusiness'),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                    ),
-                  ),
-                ],
-              ),
-              body: Center(
-                child: _isLoading
-                    ? LoadingAnimationWidget.fourRotatingDots(
-                        color: Colors.black, size: 60)
-                    : IndexedStack(
-                        index: _selectedIndex,
-                        children: [
-                          const Customers(),
-                          const Inbox(),
-                          Settings()
-                        ],
                       ),
-              ),
-              bottomNavigationBar: BottomNavigationBar(
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.people),
-                    label: AppLocalizations.of(context)!.translate('customers'),
                   ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.chat),
-                    label: AppLocalizations.of(context)!.translate("inbox"),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.menu),
-                    label: AppLocalizations.of(context)!.translate('more'),
-                  ),
-                ],
-                currentIndex: _selectedIndex,
-                //selectedItemColor: Colors.redAccent,
-                onTap: _onItemTapped,
-                type: BottomNavigationBarType.fixed,
-              ),
+                ),
+              ],
             ),
-            // if (_isLoading)
-            //   Center(
-            //     child: LoadingAnimationWidget.fourRotatingDots(
-            //           color: Colors.black, size: 60),
-            //   ),
-          ],
-        ),
+            body: Center(
+              child: _isLoading
+                  ? LoadingAnimationWidget.fourRotatingDots(
+                      color: Colors.black, size: 60)
+                  : IndexedStack(
+                      index: _selectedIndex,
+                      children: [const Customers(), Settings()],
+                    ),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.people),
+                  label: AppLocalizations.of(context)!.translate('customers'),
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.menu),
+                  label: AppLocalizations.of(context)!.translate('more'),
+                ),
+              ],
+              currentIndex: _selectedIndex,
+              //selectedItemColor: Colors.redAccent,
+              onTap: _onItemTapped,
+              type: BottomNavigationBarType.fixed,
+            ),
+          ),
+          // if (_isLoading)
+          //   Center(
+          //     child: LoadingAnimationWidget.fourRotatingDots(
+          //           color: Colors.black, size: 60),
+          //   ),
+        ],
       ),
     );
   }

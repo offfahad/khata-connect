@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:khata_connect/pages/backup/backup.dart';
-import 'package:khata_connect/pages/setting/currency_selection.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/appLocalizations.dart';
-import '../../helpers/constants.dart';
 import '../../providers/my_theme_provider.dart';
 import '../../providers/stateNotifier.dart';
-import '../../models/business.dart';
 import '../businesses/businessInformation.dart';
 
 class Settings extends StatefulWidget {
+  const Settings({super.key});
+
   @override
-  _SettingsState createState() => _SettingsState();
+  State<Settings> createState() => _SettingsState();
 }
 
 class _SettingsState extends State<Settings> {
-  final _formKey = GlobalKey<FormState>();
-  String _currency = "Rs";
-  Business? _businessInfo = Business();
   @override
   void initState() {
     super.initState();
@@ -27,21 +23,27 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final themeStatus = Provider.of<MyThemeProvider>(context);
-    Color color = themeStatus.themeType ? Colors.black : Colors.white;
+
     return Scaffold(
       body: Column(
         children: <Widget>[
+          // Header Section
           Container(
-            decoration: BoxDecoration(
-                //color: Theme.of(context).primaryColor,
-                ),
             height: 150,
+            decoration: BoxDecoration(
+              color: theme.primaryColor,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.fromLTRB(0, 15, 0, 5),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: const Image(
                     image: AssetImage('assets/images/logo.png'),
                     width: 100,
@@ -49,245 +51,175 @@ class _SettingsState extends State<Settings> {
                   ),
                 ),
                 Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     AppLocalizations.of(context)!.translate('appInfo'),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       height: 1.6,
-                      //color: Colors.white70,
+                      color: theme.colorScheme.onPrimary.withOpacity(0.9),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+
+          // Settings List
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                  //color: Theme.of(context).primaryColor,
-                  ),
-              child: Transform.translate(
-                offset: const Offset(0.0, 10.0),
+              margin: const EdgeInsets.only(top: 10),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20)),
                 child: Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(25.0),
-                          topLeft: Radius.circular(25.0)),
-                      color: Colors.white,
-                    ),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        SwitchListTile(
-                            title: Text(
-                              AppLocalizations.of(context)!.translate('theme'),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.normal),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                  ),
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                    physics: const BouncingScrollPhysics(),
+                    children: <Widget>[
+                      // Theme Toggle
+                      _buildSettingsItem(
+                        context,
+                        icon: Icon(
+                          themeStatus.themeType
+                              ? Icons.dark_mode_outlined
+                              : Icons.light_mode_outlined,
+                          size: 28,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        title: AppLocalizations.of(context)!.translate('theme'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('themeSubtitle'),
+                        trailing: Switch(
+                          value: themeStatus.themeType,
+                          onChanged: (value) => themeStatus.setTheme = value,
+                          activeColor: theme.colorScheme.secondary,
+                        ),
+                      ),
+
+                      // Business Information
+                      _buildSettingsItem(
+                        context,
+                        icon: Image.asset(
+                          "assets/images/business.png",
+                          width: 28,
+                          height: 28,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        title: AppLocalizations.of(context)!
+                            .translate('businessInfo'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('businessInfoMeta'),
+                        onTap: () async {
+                          final updatedBusinessInfo = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BusinessInformation(),
                             ),
-                            subtitle: Text(AppLocalizations.of(context)!
-                                .translate('themeSubtitle')),
-                            secondary: Icon(
-                              themeStatus.themeType
-                                  ? Icons.dark_mode_outlined
-                                  : Icons.light_mode_outlined,
-                              size: 30,
-                            ),
-                            value: themeStatus.themeType,
-                            onChanged: (value) {
-                              themeStatus.setTheme = value;
-                            }),
-                        InkWell(
-                          onTap: () async {
-                            final updatedBusinessInfo = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BusinessInformation(),
+                          );
+                          if (updatedBusinessInfo != null) {
+                            setState(() {});
+                          }
+                        },
+                      ),
+
+                      // Language Selection
+                      _buildSettingsItem(
+                        context,
+                        icon: Image.asset(
+                          "assets/images/lang.png",
+                          width: 28,
+                          height: 28,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        title: AppLocalizations.of(context)!
+                            .translate('languageInfo'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('languageInfoMeta'),
+                        trailing: DropdownButton<String>(
+                          dropdownColor: theme.cardColor,
+                          icon: Icon(Icons.arrow_drop_down,
+                              color: theme.colorScheme.secondary),
+                          value:
+                              Provider.of<AppStateNotifier>(context).appLocale,
+                          onChanged: (String? newValue) async {
+                            await changeLanguage(context, newValue!);
+                          },
+                          items: <String>["en", "ur"]
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Row(
+                                children: [
+                                  Image(
+                                    image:
+                                        AssetImage("assets/images/$value.png"),
+                                    width: 18,
+                                    //color: theme.colorScheme.onSurface,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    value == "en" ? "English" : "اردو",
+                                    style: TextStyle(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
-                            if (updatedBusinessInfo != null) {
-                              setState(() {
-                                _businessInfo =
-                                    updatedBusinessInfo; // Update the state with the new business info
-                              });
-                            }
-                          },
-                          child: ListTile(
-                            leading: const Image(
-                              image: AssetImage("assets/images/business.png"),
-                              width: 30,
-                              height: 30,
-                            ),
-                            title: Text(
-                              AppLocalizations.of(context)!
-                                  .translate('businessInfo'),
-                            ),
-                            subtitle: Text(
-                              AppLocalizations.of(context)!
-                                  .translate('businessInfoMeta'),
-                            ),
+                          }).toList(),
+                        ),
+                      ),
+
+                      // Currency Selection
+
+                      _buildSettingsItem(
+                        context,
+                        icon: Image.asset(
+                          "assets/images/currency.png",
+                          width: 28,
+                          height: 28,
+                          color: theme.colorScheme.secondary,
+                        ),
+                        title: AppLocalizations.of(context)!
+                            .translate('changeCurrency'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('changeCurrencyMeta'),
+                        trailing: Text(
+                          Provider.of<AppStateNotifier>(context).currency,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        InkWell(
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Backup(),
-                              ),
-                            );
-                          },
-                          child: ListTile(
-                            leading: const Image(
-                              image: AssetImage("assets/images/backup.png"),
-                              width: 30,
-                              height: 30,
-                            ),
-                            title: Text(AppLocalizations.of(context)!
-                                .translate('backupInfo')),
-                            subtitle: Text(AppLocalizations.of(context)!
-                                .translate('backupInfoMeta')),
-                          ),
+                        onTap: () => _showCurrencyBottomSheet(context),
+                      ),
+
+                      // Share App
+                      _buildSettingsItem(
+                        context,
+                        icon: Image.asset(
+                          "assets/images/share.png",
+                          width: 28,
+                          height: 28,
+                          color: theme.colorScheme.secondary,
                         ),
-                        ListTile(
-                          leading: const Image(
-                            image: AssetImage("assets/images/lang.png"),
-                            width: 30,
-                            height: 30,
-                          ),
-                          title: Text(AppLocalizations.of(context)!
-                              .translate('languageInfo')),
-                          subtitle: Text(AppLocalizations.of(context)!
-                              .translate('languageInfoMeta')),
-                          trailing: DropdownButton<String>(
-                            iconEnabledColor: Colors.black,
-                            value: Provider.of<AppStateNotifier>(context)
-                                .appLocale,
-                            onChanged: (String? newValue) async {
-                              await changeLanguage(context, newValue!);
-                            },
-                            items: <String>["en", "ur"]
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Row(
-                                    children: [
-                                      Image(
-                                        image: AssetImage(
-                                            "assets/images/$value.png"),
-                                        width: 18,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(value == "en" ? "English" : "اردو"),
-                                    ],
-                                  ));
-                            }).toList(),
-                          ),
-                        ),
-                        // ListTile(
-                        //   leading: const Image(
-                        //     image: AssetImage("assets/images/calendar.png"),
-                        //     width: 30,
-                        //     height: 30,
-                        //   ),
-                        //   title: Text(AppLocalizations.of(context)!
-                        //       .translate('changeCalendar')),
-                        //   subtitle: Text(AppLocalizations.of(context)!
-                        //       .translate('changeCalendarMeta')),
-                        //   trailing: DropdownButton<String>(
-                        //     iconEnabledColor: Colors.black,
-                        //     value:
-                        //         Provider.of<AppStateNotifier>(context).calendar,
-                        //     onChanged: (String? newValue) async {
-                        //       await changeCalendar(context, newValue!);
-                        //     },
-                        //     items: <String>["en", "ur"]
-                        //         .map<DropdownMenuItem<String>>((String value) {
-                        //       return DropdownMenuItem<String>(
-                        //           value: value,
-                        //           child: Row(
-                        //             children: [
-                        //               Text(value == "en" ? "English" : "Urdu"),
-                        //             ],
-                        //           ));
-                        //     }).toList(),
-                        //   ),
-                        // ),
-                        // InkWell(
-                        //   onTap: () {
-                        //     showBottomSheet(
-                        //       context: context,
-                        //       builder: (context) => StatefulBuilder(builder:
-                        //           (BuildContext context, StateSetter setState) {
-                        //         return Transform.translate(
-                        //           offset: const Offset(0.0, 80.0),
-                        //           child: contactForm(context),
-                        //         );
-                        //       }),
-                        //     );
-                        //   },
-                        //   child: ListTile(
-                        //     leading: const Image(
-                        //       image: AssetImage("assets/images/currency.png"),
-                        //       width: 30,
-                        //       height: 30,
-                        //     ),
-                        //     title: Text(AppLocalizations.of(context)!
-                        //         .translate('changeCurrency')),
-                        //     subtitle: Text(AppLocalizations.of(context)!
-                        //         .translate('changeCurrencyMeta')),
-                        //     trailing: Text(
-                        //         Provider.of<AppStateNotifier>(context)
-                        //             .currency),
-                        //   ),
-                        // ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CurrencySelectionScreen(),
-                              ),
-                            );
-                          },
-                          child: ListTile(
-                            leading: const Image(
-                              image: AssetImage("assets/images/currency.png"),
-                              width: 30,
-                              height: 30,
-                            ),
-                            title: Text(
-                              AppLocalizations.of(context)!
-                                  .translate('changeCurrency'),
-                            ),
-                            subtitle: Text(
-                              AppLocalizations.of(context)!
-                                  .translate('changeCurrencyMeta'),
-                            ),
-                            trailing: Text(Provider.of<AppStateNotifier>(context).currency, style: const TextStyle(fontSize: 16),),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Share.share(
-                                'Check out my portfolio: https://offfahad.netlify.app');
-                          },
-                          child: ListTile(
-                            leading: const Image(
-                              image: AssetImage("assets/images/share.png"),
-                              width: 30,
-                              height: 30,
-                            ),
-                            title: Text(AppLocalizations.of(context)!
-                                .translate('shareInfo')),
-                            subtitle: Text(AppLocalizations.of(context)!
-                                .translate('shareInfoMeta')),
-                          ),
-                        ),
-                      ],
-                    )),
+                        title: AppLocalizations.of(context)!
+                            .translate('shareInfo'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('shareInfoMeta'),
+                        onTap: () {
+                          Share.share(
+                              'Check out my portfolio: https://offfahad.netlify.app');
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -296,62 +228,178 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget contactForm(BuildContext context) {
-    _currency = Provider.of<AppStateNotifier>(context).currency;
-    return Container(
-      height: 350,
-      padding: const EdgeInsets.all(36),
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-        //color: Colors.blueGrey.shade100,
+// Add this new method to your class:
+  Future<void> _showCurrencyBottomSheet(BuildContext context) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final notifier = Provider.of<AppStateNotifier>(context, listen: false);
+
+    // Get current currency
+    final prefs = await SharedPreferences.getInstance();
+    String currentCurrency = prefs.getString('currency') ?? 'Rs';
+
+    // Controller for text field
+    final TextEditingController controller =
+        TextEditingController(text: currentCurrency);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                AppLocalizations.of(context)!.translate('changeCurrency'),
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.translate('changeCurrency'),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: colorScheme.onSurface),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context)!.translate('currencySymbol'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: colorScheme.surfaceVariant.withOpacity(0.4),
+                prefixIcon:
+                    Icon(Icons.currency_exchange, color: colorScheme.primary),
+                hintText: 'Rs, \$, €, £, etc.',
               ),
-              TextFormField(
-                textAlign: TextAlign.left,
-                initialValue: _currency,
-                onSaved: (String? val) {
-                  _currency = val!;
-                },
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return AppLocalizations.of(context)!
-                        .translate('currencyError');
+              style: TextStyle(color: colorScheme.onSurface),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)!
+                      .translate('currencyRequired');
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (controller.text.trim().isNotEmpty) {
+                    final newCurrency = controller.text.trim();
+                    await prefs.setString('currency', newCurrency);
+                    notifier.updateCurrency(newCurrency);
+                    if (mounted) Navigator.pop(context);
+
+                    // Show success feedback
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          AppLocalizations.of(context)!
+                              .translate('currencyUpdated'),
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
                   }
-                  return null;
                 },
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  //foregroundColor: Colors.white,
-                  backgroundColor: xDarkBlue, // Text color
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: colorScheme.primary,
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.translate('updateCurrency'),
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(
+                    color: colorScheme.onPrimary,
+                    fontSize: 16,
+                  ),
                 ),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    await changeCurrency(context, _currency);
-                    Navigator.of(context).pop();
-                  }
-                },
               ),
-            ],
+            ),
+            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsItem(
+    BuildContext context, {
+    required Widget icon,
+    required String title,
+    required String subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            if (theme.brightness == Brightness.light)
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            if (theme.brightness == Brightness.dark)
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 0),
+              ),
+          ],
+        ),
+        child: ListTile(
+          leading: icon,
+          title: Text(
+            title,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
           ),
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+          trailing: trailing,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          minVerticalPadding: 12,
         ),
       ),
     );

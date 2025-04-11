@@ -84,6 +84,15 @@
   "backupDone": "بیک اپ کامیابی سے مکمل ہوا",
   "inbox": "پیغامات",
   "theme": "تھیم",
-  "themeSubtitle": "اپنی تھیم ترجیح کو تبدیل کریں"
+  "themeSubtitle": "اپنی تھیم ترجیح کو تبدیل کریں",
+  "addImage": "تصویر شامل کریں",
+  "transactionDetails": "لین دین کی تفصیلات",
+  "currencyUpdated": "کرنسی اپ ڈیٹ ",
+  "currencySymbol": "کرنسی کا نشان",
+  "currencyRequired": "کرنسی درکار ہے",
+  "confirmDelete": "حذف شدہ کی تصدیق کریں",
+  "deleteCompanyWarning": "کیا آپ واقعی یہ کاروبار حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں لیا جا سکتا۔",
+  "cancel": "منسوخ کریں",
+  "delete": "حذف کریں"
 }
 

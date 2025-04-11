@@ -45,5 +45,27 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to capture transaction receipts and profile pictures.</string>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to upload transaction images and profile photos.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app needs access to your documents folder to save generated PDFs of transactions.</string>
+
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>This app needs access to downloads to save PDF files.</string>
+
+	<key>NSContactsUsageDescription</key>
+	<string>This app needs contacts access to manage transaction-related contacts.</string>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>http</string>
+		<string>https</string>
+		<string>tel</string>
+		<string>mailto</string>
+	</array>
+
 </dict>
 </plist>

@@ -19,7 +19,7 @@ import '../../helpers/generateCustomersPdf.dart';
 import '../../models/customer.dart';
 
 class Customers extends StatefulWidget {
-  const Customers({Key? key}) : super(key: key);
+  const Customers({super.key});
 
   @override
   _CustomersState createState() => _CustomersState();
@@ -39,56 +39,51 @@ class _CustomersState extends State<Customers> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Stack(
       children: [
         Scaffold(
           body: Container(
-            decoration: const BoxDecoration(
-                //color: Colors.white,
-                ),
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
+            ),
             child: Column(
               children: [
                 Container(
                   alignment: Alignment.center,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                      //color: Theme.of(context).primaryColor,
-                      ),
+                  height: 100,
                   child: Column(
                     children: [
-                      // Container(
-                      //   padding: const EdgeInsets.fromLTRB(16, 10, 0, 0),
-                      //   child: Row(
-                      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //     children: <Widget>[
-                      //       getTotalGivenToCustomersWidget(),
-                      //       getTotalToReceiveFromCustomersWidget(),
-                      //       IconButton(
-                      //         icon: const Icon(Icons.picture_as_pdf),
-                      //         color: Colors.red,
-                      //         onPressed: generatePdf,
-                      //       )
-                      //     ],
-                      //   ),
-                      // ),
                       Container(
                         padding: const EdgeInsets.fromLTRB(8, 15, 8, 0),
                         child: Card(
+                          color: isDarkMode
+                              ? const Color(0xFF444654)
+                              : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          elevation: 06,
+                          elevation: 6,
                           semanticContainer: true,
                           clipBehavior: Clip.antiAliasWithSaveLayer,
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
                             child: TextField(
                               controller: _searchInputController,
+                              style:
+                                  TextStyle(color: theme.colorScheme.onSurface),
                               decoration: InputDecoration(
-                                labelText: AppLocalizations.of(context)!.translate(
-                                    'searchCustomers'), // Replace with AppLocalizations
+                                labelText: AppLocalizations.of(context)!
+                                    .translate('searchCustomers'),
+                                labelStyle: TextStyle(
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.7)),
                                 suffixIcon: _searchText.isEmpty
-                                    ? const Icon(Icons.search)
+                                    ? Icon(Icons.search,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.7))
                                     : IconButton(
                                         icon: const Icon(Icons.close),
                                         onPressed: () {
@@ -115,12 +110,12 @@ class _CustomersState extends State<Customers> {
                 ),
                 Expanded(
                   child: Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(25.0),
                         topLeft: Radius.circular(25.0),
                       ),
-                      color: Colors.white,
+                      color: theme.cardColor,
                     ),
                     child: getCustomersList(),
                   ),
@@ -129,6 +124,7 @@ class _CustomersState extends State<Customers> {
             ),
           ),
           floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: theme.primaryColor,
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -138,18 +134,24 @@ class _CustomersState extends State<Customers> {
             },
             icon: const Icon(
               Icons.add,
+              color: Colors.white,
             ),
-            label: Text(AppLocalizations.of(context)!
-                .translate('addCustomer')), // Replace with AppLocalizations
+            label: Text(
+              AppLocalizations.of(context)!.translate('addCustomer'),
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ),
         if (_absorbing)
           AbsorbPointer(
             absorbing: _absorbing,
-            child: Center(
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: Theme.of(context).colorScheme.secondary,
-                size: 60,
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: LoadingAnimationWidget.fourRotatingDots(
+                  color: theme.colorScheme.secondary,
+                  size: 60,
+                ),
               ),
             ),
           ),
@@ -168,8 +170,9 @@ class _CustomersState extends State<Customers> {
       await file.writeAsBytes(pdf);
       OpenFile.open(file.path);
     } catch (e) {
-      // Handle errors (e.g., show a snackbar)
-      print('Error generating PDF: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating PDF: $e')),
+      );
     } finally {
       setState(() {
         _absorbing = false;
@@ -178,16 +181,21 @@ class _CustomersState extends State<Customers> {
   }
 
   Widget getCustomersList() {
+    final theme = Theme.of(context);
+
     return Consumer<AppStateNotifier>(builder: (context, provider, child) {
       return FutureBuilder<List<Customer>>(
         future: _customerBloc.getCustomers(query: _searchText),
         builder:
             (BuildContext context, AsyncSnapshot<List<Customer>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+                child: CircularProgressIndicator(color: theme.primaryColor));
           }
           if (snapshot.hasError) {
-            return const Center(child: Text("Unknown Error."));
+            return Center(
+                child: Text("Unknown Error.",
+                    style: TextStyle(color: theme.colorScheme.error)));
           }
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             return ListView.builder(
@@ -215,7 +223,7 @@ class _CustomersState extends State<Customers> {
                         radius: 28,
                         backgroundColor: customerImage != null
                             ? Colors.transparent
-                            : Colors.purple.shade500,
+                            : theme.primaryColor,
                         child: customerImage != null
                             ? ClipOval(
                                 child: Image.memory(
@@ -226,53 +234,81 @@ class _CustomersState extends State<Customers> {
                                 ),
                               )
                             : const Icon(Icons.person,
-                                color: Colors.purple, size: 24.0),
+                                color: Colors.white, size: 24.0),
                       ),
                       title: Text(
                         customer.name!,
-                        style: const TextStyle(
-                          color: Colors.black,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       subtitle: Row(
                         children: <Widget>[
-                          const Icon(
+                          Icon(
                             Icons.phone,
                             size: 12.0,
-                            color: Colors.black87,
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
                             child: Text(
                               customer.phone!,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.black87),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      trailing:
-                          getCustomerTransactionsTotalWidget(customer.id!),
+                      trailing: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: 100,
+                          maxWidth: MediaQuery.of(context).size.width * 0.3,
+                        ),
+                        child: getCustomerTransactionsTotalWidget(customer.id!),
+                      ),
                     ),
                     if (itemIndex < snapshot.data!.length - 1)
-                      const Divider(color: Colors.grey, height: 2),
+                      Divider(
+                        color: theme.dividerColor,
+                        height: 1,
+                        thickness: 0.5,
+                      ),
                   ],
                 );
               },
             );
           }
-          return const Center(child: Text("No customers found."));
+          return Center(
+            child: Text(
+              "No customers found.",
+              style: TextStyle(
+                  color: theme.colorScheme.onSurface.withOpacity(0.5)),
+            ),
+          );
         },
       );
     });
   }
 
   Widget getCustomerTransactionsTotalWidget(int cid) {
+    final theme = Theme.of(context);
+
     return FutureBuilder<double>(
       future: transactionBloc.getCustomerTransactionsTotal(cid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox();
+          return SizedBox(
+            width: 100,
+            child: LinearProgressIndicator(
+              minHeight: 2,
+              backgroundColor: theme.dividerColor,
+              color: theme.primaryColor,
+            ),
+          );
         }
         if (snapshot.hasError) {
           return const SizedBox();
@@ -280,34 +316,31 @@ class _CustomersState extends State<Customers> {
         if (snapshot.hasData) {
           final total = snapshot.data!;
           final ttype = total.isNegative ? "credit" : "payment";
-          return SizedBox(
-            width: 130, // Set a fixed width for the trailing widget
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Text(
-                      amountFormat(context, total.abs()),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: ttype == 'payment' ? Colors.green : Colors.red,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    amountFormat(context, total.abs()),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: ttype == 'payment' ? Colors.green : Colors.red,
                     ),
-                  ],
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     ttype == "credit"
                         ? AppLocalizations.of(context)!.translate('given')
-                        : AppLocalizations.of(context)!.translate(
-                            'received'), // Replace with AppLocalizations
-                    style: const TextStyle(
-                      color: Colors.black87,
+                        : AppLocalizations.of(context)!.translate('received'),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                       fontSize: 10,
                       letterSpacing: 0.6,
                     ),
@@ -327,33 +360,31 @@ class _CustomersState extends State<Customers> {
     if (bid == null) return const SizedBox();
 
     return FutureBuilder<double>(
-      future: transactionBloc
-          .getBusinessTransactionsTotal(bid), // Ensure `bid.id` is used
+      future: transactionBloc.getBusinessTransactionsTotal(bid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Better to show a progress indicator
+          return CircularProgressIndicator(
+              color: Theme.of(context).primaryColor);
         }
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}'); // Display error if present
+          return Text('Error: ${snapshot.error}',
+              style: TextStyle(color: Theme.of(context).colorScheme.error));
         }
         if (snapshot.hasData) {
           final total = snapshot.data!;
           final ttype = total.isNegative ? "credit" : "payment";
-          return Row(
-            children: <Widget>[
-              Text(
-                amountFormat(
-                    context, total.abs()), // Ensure `amountFormat` is defined
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: ttype == 'payment' ? Colors.green : Colors.red,
-                ),
+          return FittedBox(
+            child: Text(
+              amountFormat(context, total.abs()),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: ttype == 'payment' ? Colors.green : Colors.red,
               ),
-            ],
+            ),
           );
         }
-        return const SizedBox(); // Handle case when no data
+        return const SizedBox();
       },
     );
   }
@@ -366,35 +397,27 @@ class _CustomersState extends State<Customers> {
       future: transactionBloc.getTotalGivenToCustomers(bid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Better to show a progress indicator
+          return CircularProgressIndicator(
+              color: Theme.of(context).primaryColor);
         }
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}'); // Display error if present
+          return Text('Error: ${snapshot.error}',
+              style: TextStyle(color: Theme.of(context).colorScheme.error));
         }
         if (snapshot.hasData) {
           final totalGiven = snapshot.data!;
-          return Row(
-            children: <Widget>[
-              Text(
-                amountFormat(
-                    context, totalGiven), // Ensure `amountFormat` is defined
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.red,
-                ),
+          return FittedBox(
+            child: Text(
+              amountFormat(context, totalGiven),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.red,
               ),
-              // Text(
-              //   ' Total Given to Customers',
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     color: Colors.black,
-              //   ),
-              // ),
-            ],
+            ),
           );
         }
-        return const SizedBox(); // Handle case when no data
+        return const SizedBox();
       },
     );
   }
@@ -407,35 +430,27 @@ class _CustomersState extends State<Customers> {
       future: transactionBloc.getTotalToReceiveFromCustomers(bid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // Better to show a progress indicator
+          return CircularProgressIndicator(
+              color: Theme.of(context).primaryColor);
         }
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}'); // Display error if present
+          return Text('Error: ${snapshot.error}',
+              style: TextStyle(color: Theme.of(context).colorScheme.error));
         }
         if (snapshot.hasData) {
           final totalToReceive = snapshot.data!;
-          return Row(
-            children: <Widget>[
-              Text(
-                amountFormat(context,
-                    totalToReceive), // Ensure `amountFormat` is defined
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.green,
-                ),
+          return FittedBox(
+            child: Text(
+              amountFormat(context, totalToReceive),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: Colors.green,
               ),
-              // Text(
-              //   ' Total to Receive from Customers',
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     color: Colors.black,
-              //   ),
-              // ),
-            ],
+            ),
           );
         }
-        return const SizedBox(); // Handle case when no data
+        return const SizedBox();
       },
     );
   }

@@ -13,8 +13,10 @@ import '../../main.dart';
 import '../../models/business.dart';
 
 class AddBusiness extends StatefulWidget {
+  const AddBusiness({super.key});
+
   @override
-  _AddBusinessState createState() => _AddBusinessState();
+  State<AddBusiness> createState() => _AddBusinessState();
 }
 
 class _AddBusinessState extends State<AddBusiness> {
@@ -28,7 +30,7 @@ class _AddBusinessState extends State<AddBusiness> {
   File? _logo;
   final ImagePicker _picker = ImagePicker();
 
-  Business _business = Business();
+  final Business _business = Business();
 
   Future<void> getImageFrom(String from) async {
     XFile? image;
@@ -51,13 +53,17 @@ class _AddBusinessState extends State<AddBusiness> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(
           children: <Widget>[
-            Icon(Icons.warning, color: Colors.redAccent),
+            const Icon(Icons.warning, color: Colors.redAccent),
             Padding(
-              padding: EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: 8),
               child: Text(
                   AppLocalizations.of(context)!.translate('imageSizeError')),
             ),
           ],
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
       ));
       return;
@@ -70,29 +76,40 @@ class _AddBusinessState extends State<AddBusiness> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        //backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            AppLocalizations.of(context)!.translate('addCompany'),
-            style: TextStyle(
-              //color: Colors.black,
-            ),
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        elevation: 0,
+        forceMaterialTransparency: true,
+        title: Text(
+          AppLocalizations.of(context)!.translate('addCompany'),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
           ),
-          iconTheme: IconThemeData(
-            //color: Colors.black,
-          ),
-          actions: <Widget>[
-            TextButton.icon(
+        ),
+        centerTitle: false,
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Colors.redAccent),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
               label: Text(
                 AppLocalizations.of(context)!.translate('deleteCompany'),
-                style: TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 14),
               ),
-              icon: Icon(Icons.delete, size: 20.0, color: Colors.red),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -102,42 +119,82 @@ class _AddBusinessState extends State<AddBusiness> {
                 );
               },
             ),
-          ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: addCompany,
+        icon: const Icon(Icons.check),
+        label: Text(AppLocalizations.of(context)!.translate('addCompany')),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: addCompany,
-          icon: Icon(Icons.check),
-          label: Text(AppLocalizations.of(context)!.translate('addCompany')),
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            margin: EdgeInsets.only(bottom: 48),
-            padding: EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  customerImageWidget(),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.business),
-                      hintText: AppLocalizations.of(context)!
-                          .translate('companyNameLabelMeta'),
-                      labelText: AppLocalizations.of(context)!
-                          .translate('companyNameLabel'),
-                    ),
-                    validator: (input) {
-                      if (input == null || input.isEmpty) {
-                        return AppLocalizations.of(context)!
-                            .translate('companyNameLabelError');
-                      }
-                      return null;
-                    },
-                    onSaved: (input) => _companyName = input,
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 16),
+                companyLogoWidget(),
+                const SizedBox(height: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: isDarkMode
+                        ? theme.colorScheme.surface.withOpacity(0.5)
+                        : theme.colorScheme.surface,
+                    boxShadow: isDarkMode
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
                   ),
-                  Padding(padding: EdgeInsets.all(36)),
-                ],
-              ),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.business,
+                              color: theme.colorScheme.secondary),
+                          hintText: AppLocalizations.of(context)!
+                              .translate('companyNameLabelMeta'),
+                          labelText: AppLocalizations.of(context)!
+                              .translate('companyNameLabel'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: theme.cardColor,
+                        ),
+                        style:
+                            TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        validator: (input) {
+                          if (input == null || input.isEmpty) {
+                            return AppLocalizations.of(context)!
+                                .translate('companyNameLabelError');
+                          }
+                          return null;
+                        },
+                        onSaved: (input) => _companyName = input,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+              ],
             ),
           ),
         ),
@@ -145,59 +202,154 @@ class _AddBusinessState extends State<AddBusiness> {
     );
   }
 
-  Widget customerImageWidget() {
-    return Row(
-      children: <Widget>[
-        Center(
-          child: _logo == null
-              ? Image.asset('assets/images/noimage_person.png', width: 60)
-              : Image.file(_logo!, width: 60),
-        ),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: TextButton(
+  Widget companyLogoWidget() {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.secondary.withOpacity(0.2),
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _logo == null
+                      ? Image.asset(
+                          'assets/images/noimage_person.png',
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          _logo!,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: showUploadDialog,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.camera_alt,
+                        size: 20, color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextButton(
             onPressed: showUploadDialog,
             child: Text(
-                AppLocalizations.of(context)!.translate('companyImageLabel')),
+              AppLocalizations.of(context)!.translate('companyImageLabel'),
+              style: TextStyle(
+                color: theme.colorScheme.secondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   void showUploadDialog() {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-              AppLocalizations.of(context)!.translate('companyImageLabel')),
-          actions: <Widget>[
-            TextButton(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromCamera')),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: theme.cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Update Image',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('camera');
-              },
-            ),
-            TextButton(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromGallery')),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        Icons.camera_alt,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      label: Text(
+                        'From Camera',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: theme.dividerColor),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        getImageFrom('camera');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(
+                        Icons.photo_library,
+                        color: Colors.white,
+                      ),
+                      label: const Text('From Gallery'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        getImageFrom('gallery');
+                      },
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('gallery');
-              },
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -212,13 +364,17 @@ class _AddBusinessState extends State<AddBusiness> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Row(
             children: <Widget>[
-              Icon(Icons.warning, color: Colors.redAccent),
+              const Icon(Icons.warning, color: Colors.redAccent),
               Padding(
-                padding: EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.only(left: 8),
                 child: Text(
                     AppLocalizations.of(context)!.translate('imageSizeError')),
               ),
             ],
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
         ));
         return;
