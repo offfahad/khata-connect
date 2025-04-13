@@ -19,16 +19,12 @@
 With Khata Connect, managing your small business has never been easier. Keep your transactions organized, generate reports, and maintain customer data with confidence.
 
 # UI Design For Mobile
-![1](https://github.com/user-attachments/assets/42dc578e-475d-46c4-9972-5932c8bdafb9)
-![2](https://github.com/user-attachments/assets/bd4a9927-2921-40b3-9ce5-3a3a175d6136)
-![3](https://github.com/user-attachments/assets/a0f5b187-6c1d-4cec-9510-2e533f50ea70)
-![4](https://github.com/user-attachments/assets/30ee375a-ae67-44cc-9562-6374afee7a43)
-![5](https://github.com/user-attachments/assets/0f4b1aee-f613-4be9-b77d-33ee822e9598)
+
+<img width="1224" alt="Screenshot 2025-04-13 at 5 23 46 PM" src="https://github.com/user-attachments/assets/35e3a0f7-6601-429b-b8d4-27ff78958c79" />
 
 # UI Design For IPad
-![1](https://github.com/user-attachments/assets/88e2730e-0a60-4b1e-a5d1-ff5698dd1939)
-![2](https://github.com/user-attachments/assets/d8486f93-7bd6-4185-ac00-54f9f6360340)
-![3](https://github.com/user-attachments/assets/da446e56-06e7-437e-b6b4-f68f07192690)
+
+<img width="1258" alt="Screenshot 2025-04-13 at 5 24 45 PM" src="https://github.com/user-attachments/assets/1fb4064c-f74a-416d-9bf7-d3df4faebd74" />
 
 # Veriosn 2
 
