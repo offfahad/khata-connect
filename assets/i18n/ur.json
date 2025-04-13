@@ -5,7 +5,7 @@
   "more": "مزید",
   "searchCustomers": "گاہک تلاش کریں",
   "addCustomer": "گاہک شامل کریں",
-  "appInfo": "ادھار کھاتا \n چھوٹے کاروبار کا کریڈٹ مینجمنٹ ایپ",
+  "appInfo": "چھوٹے کاروبار کا کریڈٹ مینجمنٹ ایپ",
   "businessInfo": "کمپنی کی معلومات",
   "businessInfoMeta": "اپنی کمپنی کی معلومات سیٹ اپ کریں",
   "backupInfo": "بیک اپ",
@@ -93,6 +93,15 @@
   "confirmDelete": "حذف شدہ کی تصدیق کریں",
   "deleteCompanyWarning": "کیا آپ واقعی یہ کاروبار حذف کرنا چاہتے ہیں؟ یہ عمل واپس نہیں لیا جا سکتا۔",
   "cancel": "منسوخ کریں",
-  "delete": "حذف کریں"
+  "delete": "حذف کریں",
+  "setting": "ترتیبات",
+  "fromGallery": "گیلری سے",
+  "fromCamera": "کیمرے سے",
+  "support": "سپورٹ",
+  "supportMeta": "ڈویلپر سے رابطہ کریں",
+  "privacyPolicy": "رازداری پالیسی",
+  "privacyPolicyMeta": "ڈیٹا کے استعمال کی پالیسی دیکھیں",
+  "termsOfUse": "استعمال کے شرائط",
+  "termsOfUseMeta": "ایپ استعمال کرنے کے رہنما اصول"
 }
 

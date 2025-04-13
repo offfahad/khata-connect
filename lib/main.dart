@@ -19,11 +19,16 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the notifier before running the app
+  final notifier = AppStateNotifier();
+  await notifier.initialize();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AppStateNotifier>(
-          create: (context) => AppStateNotifier(),
+          create: (context) => notifier,
         ),
         ChangeNotifierProvider<MyThemeProvider>(
           create: (context) => MyThemeProvider()..getThemeStatus(),
@@ -53,7 +58,7 @@ class MyApp extends StatelessWidget {
           ],
           theme: MyTheme.themeData(
               isDarkTheme: themeProvider.themeType, context: context),
-          home: MyHomePage(),
+          home: const MyHomePage(),
           locale: Locale(appState.appLocale),
         );
       },
@@ -62,6 +67,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -82,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _initialize() async {
     await getTheLocale();
     await getAllBusinesses();
+    await _loadCurrency(); // Add this line
     setState(() {});
   }
 
@@ -113,6 +121,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> _loadCurrency() async {
+    final prefs = await SharedPreferences.getInstance();
+    final notifier = Provider.of<AppStateNotifier>(context, listen: false);
+    notifier.updateCurrency(prefs.getString('currency') ?? 'Rs');
+  }
+
   Future<void> getTheLocale() async {
     await fetchLocale(context);
   }
@@ -127,27 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Scaffold(
             appBar: AppBar(
-              title: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    width: 30,
-                    height: 30,
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  const Text(
-                    "Khata Connect",
-                    style: TextStyle(
-                        //color: Colors.grey,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
               elevation: 0,
               forceMaterialTransparency: true,
               //backgroundColor: Theme.of(context).colorScheme.primary,
@@ -167,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AddBusiness(),
+                            builder: (context) => const AddBusiness(),
                           ),
                         );
                       }
@@ -268,7 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.black, size: 60)
                   : IndexedStack(
                       index: _selectedIndex,
-                      children: [const Customers(), Settings()],
+                      children: [const Customers(), const Settings()],
                     ),
             ),
             bottomNavigationBar: BottomNavigationBar(
@@ -278,8 +271,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   label: AppLocalizations.of(context)!.translate('customers'),
                 ),
                 BottomNavigationBarItem(
-                  icon: const Icon(Icons.menu),
-                  label: AppLocalizations.of(context)!.translate('more'),
+                  icon: const Icon(Icons.settings),
+                  label: AppLocalizations.of(context)!.translate('setting'),
                 ),
               ],
               currentIndex: _selectedIndex,

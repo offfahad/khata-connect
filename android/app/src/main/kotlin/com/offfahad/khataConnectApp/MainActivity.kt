@@ -1,4 +1,4 @@
-package com.example.khata_connect
+package com.offfahad.khataConnectApp
 
 import io.flutter.embedding.android.FlutterActivity
 

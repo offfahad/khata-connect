@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:khata_connect/helpers/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../helpers/appLocalizations.dart';
 import '../../providers/my_theme_provider.dart';
@@ -32,9 +34,9 @@ class _SettingsState extends State<Settings> {
           // Header Section
           Container(
             height: 150,
-            decoration: BoxDecoration(
-              color: theme.primaryColor,
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              //color: theme.primaryColor,
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
@@ -45,9 +47,9 @@ class _SettingsState extends State<Settings> {
                 Container(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: const Image(
-                    image: AssetImage('assets/images/logo.png'),
-                    width: 100,
-                    height: 60,
+                    image: AssetImage('assets/images/logo_crop.png'),
+                    width: 200,
+                    height: 100,
                   ),
                 ),
                 Container(
@@ -55,9 +57,8 @@ class _SettingsState extends State<Settings> {
                   child: Text(
                     AppLocalizations.of(context)!.translate('appInfo'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      height: 1.6,
-                      color: theme.colorScheme.onPrimary.withOpacity(0.9),
+                    style: const TextStyle(
+                      height: 1.5,
                     ),
                   ),
                 ),
@@ -200,22 +201,57 @@ class _SettingsState extends State<Settings> {
                       ),
 
                       // Share App
+                      // _buildSettingsItem(
+                      //   context,
+                      //   icon: Image.asset(
+                      //     "assets/images/share.png",
+                      //     width: 28,
+                      //     height: 28,
+                      //     color: theme.colorScheme.secondary,
+                      //   ),
+                      //   title: AppLocalizations.of(context)!
+                      //       .translate('shareInfo'),
+                      //   subtitle: AppLocalizations.of(context)!
+                      //       .translate('shareInfoMeta'),
+                      //   onTap: () {
+                      //     Share.share(
+                      //         'Check out my portfolio: https://offfahad.netlify.app');
+                      //   },
+                      //),
+
+                      // Privacy Policy
                       _buildSettingsItem(
                         context,
-                        icon: Image.asset(
-                          "assets/images/share.png",
-                          width: 28,
-                          height: 28,
-                          color: theme.colorScheme.secondary,
-                        ),
+                        icon: Icon(Icons.privacy_tip_outlined,
+                            size: 30, color: theme.colorScheme.secondary),
                         title: AppLocalizations.of(context)!
-                            .translate('shareInfo'),
+                            .translate('privacyPolicy'),
                         subtitle: AppLocalizations.of(context)!
-                            .translate('shareInfoMeta'),
-                        onTap: () {
-                          Share.share(
-                              'Check out my portfolio: https://offfahad.netlify.app');
-                        },
+                            .translate('privacyPolicyMeta'),
+                        onTap: () => _launchUrl(privacyPolicyUrl),
+                      ),
+
+                      // Terms of Use
+                      _buildSettingsItem(
+                        context,
+                        icon: Icon(Icons.description_outlined,
+                            size: 30, color: theme.colorScheme.secondary),
+                        title: AppLocalizations.of(context)!
+                            .translate('termsOfUse'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('termsOfUseMeta'),
+                        onTap: () => _launchUrl(termsOfUseUrl),
+                      ),
+
+                      _buildSettingsItem(
+                        context,
+                        icon: Icon(Icons.help_outline,
+                            size: 30, color: theme.colorScheme.secondary),
+                        title:
+                            AppLocalizations.of(context)!.translate('support'),
+                        subtitle: AppLocalizations.of(context)!
+                            .translate('supportMeta'),
+                        onTap: () => _launchUrl(portfolioUrl),
                       ),
                     ],
                   ),
@@ -226,6 +262,15 @@ class _SettingsState extends State<Settings> {
         ],
       ),
     );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    if (!await launchUrl(Uri.parse(url),
+        mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch $url')),
+      );
+    }
   }
 
 // Add this new method to your class:
@@ -306,8 +351,7 @@ class _SettingsState extends State<Settings> {
                 onPressed: () async {
                   if (controller.text.trim().isNotEmpty) {
                     final newCurrency = controller.text.trim();
-                    await prefs.setString('currency', newCurrency);
-                    notifier.updateCurrency(newCurrency);
+                    await changeCurrency(context, newCurrency);
                     if (mounted) Navigator.pop(context);
 
                     // Show success feedback

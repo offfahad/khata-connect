@@ -2,17 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/helpers/conversion.dart';
-import 'package:provider/provider.dart';
-
+import 'package:khata_connect/helpers/appLocalizations.dart';
 import '../../blocs/customerBloc.dart';
 import '../../blocs/transactionBloc.dart';
-import '../../helpers/appLocalizations.dart';
-import '../../providers/stateNotifier.dart';
 import '../../models/customer.dart';
 import '../../models/transaction.dart';
 import 'singleTransaction.dart';
@@ -20,29 +16,47 @@ import 'singleTransaction.dart';
 class EditTransaction extends StatefulWidget {
   final Transaction transaction;
 
-  EditTransaction(this.transaction, {Key? key}) : super(key: key);
+  const EditTransaction(this.transaction, {Key? key}) : super(key: key);
 
   @override
   _EditTransactionState createState() => _EditTransactionState();
 }
 
 class _EditTransactionState extends State<EditTransaction> {
-  String _transType = "credit";
-  final TextEditingController _customersField = TextEditingController();
-  final TransactionBloc transactionBloc = TransactionBloc();
-  final CustomerBloc customerBloc = CustomerBloc();
+  final TransactionBloc _transactionBloc = TransactionBloc();
+  final CustomerBloc _customerBloc = CustomerBloc();
+  final _formKey = GlobalKey<FormState>();
+  final _picker = ImagePicker();
 
+  String _transType = "credit";
   String? _comment;
   int? _customerId;
   double? _amount;
   DateTime _date = DateTime.now();
   File? _attachment;
-  final picker = ImagePicker();
+  Uint8List? _existingAttachment;
 
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<AutoCompleteTextFieldState<Customer>> _customerSuggestionKey =
-      GlobalKey();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  @override
+  void initState() {
+    super.initState();
+    final transaction = widget.transaction;
+    _transType = transaction.ttype!;
+    _comment = transaction.comment;
+    _amount = transaction.amount;
+    _date = transaction.date!;
+    _customerId = transaction.uid;
+
+    if (transaction.attachment != null) {
+      _existingAttachment = base64Decode(transaction.attachment!);
+    }
+  }
+
+  @override
+  void dispose() {
+    _transactionBloc.dispose();
+    _customerBloc.dispose();
+    super.dispose();
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -51,417 +65,454 @@ class _EditTransactionState extends State<EditTransaction> {
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2030, 8),
       builder: (BuildContext context, Widget? child) {
+        final theme = Theme.of(context);
         return Theme(
-          data: ThemeData.dark().copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: Theme.of(context).colorScheme.secondary,
-              onPrimary: Colors.white,
-              surface: Colors.green.shade500,
-              onSurface: Colors.white,
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.secondary,
+              onPrimary: theme.colorScheme.onSecondary,
+              surface: theme.cardColor,
+              onSurface: theme.colorScheme.onSurface,
             ),
-            dialogBackgroundColor: Theme.of(context).primaryColor,
+            dialogBackgroundColor: theme.cardColor,
           ),
           child: child!,
         );
       },
     );
     if (picked != null && picked != _date) {
-      setState(() {
-        _date = picked;
-      });
+      setState(() => _date = picked);
     }
   }
 
-  Future<void> getImageFrom(String from) async {
-    XFile? image;
-    if (from == 'camera') {
-      image = await picker.pickImage(source: ImageSource.camera);
-    } else {
-      image = await picker.pickImage(source: ImageSource.gallery);
-    }
+  Future<void> _getImageFrom(String from) async {
+    try {
+      final XFile? image = from == 'camera'
+          ? await _picker.pickImage(source: ImageSource.camera)
+          : await _picker.pickImage(source: ImageSource.gallery);
 
-    if (image == null) return;
+      if (image == null) return;
 
-    ImageProperties properties =
-        await FlutterNativeImage.getImageProperties(image.path);
-    File rawImage = await FlutterNativeImage.compressImage(image.path,
+      final properties =
+          await FlutterNativeImage.getImageProperties(image.path);
+      final compressedImage = await FlutterNativeImage.compressImage(
+        image.path,
         quality: 80,
         targetWidth: 800,
-        targetHeight: (properties.height! * 800 / properties.width!).round());
+        targetHeight: (properties.height! * 800 / properties.width!).round(),
+      );
 
-    if (rawImage.lengthSync() > 200000) {
-      final snackBar = SnackBar(
-          content: Row(children: <Widget>[
-        const Icon(
-          Icons.warning,
-          color: Colors.redAccent,
-        ),
-        Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            child:
-                Text(AppLocalizations.of(context)!.translate('imageSizeError')))
-      ]));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      return;
+      if (compressedImage.lengthSync() > 2000000) {
+        _showErrorSnackbar(
+            AppLocalizations.of(context)!.translate('imageSizeError'));
+        return;
+      }
+
+      setState(() {
+        _attachment = compressedImage;
+        _existingAttachment = null;
+      });
+    } catch (e) {
+      _showErrorSnackbar(AppLocalizations.of(context)!.translate('imageError'));
     }
-
-    setState(() {
-      _attachment = rawImage;
-    });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    Transaction transaction = widget.transaction;
-    _customerId = transaction.uid;
-    _transType = transaction.ttype!;
-    _date = transaction.date!;
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 8),
+            Text(message),
+          ],
+        ),
+        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Transaction argTransaction = widget.transaction;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return FutureBuilder(
-      future: customerBloc.getCustomers(),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.hasData) {
-          List<Customer> customers = snapshot.data;
-          if (_customerId != null) {
-            customers.forEach((item) {
-              if (_customerId == item.id) {
-                _customersField.text = item.name!;
-              }
-            });
-          } else {
-            customers.forEach((item) {
-              if (argTransaction.uid == item.id) {
-                _customersField.text = item.name!;
-              }
-            });
-          }
-
+    return FutureBuilder<List<Customer>>(
+      future: _customerBloc.getCustomers(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            //backgroundColor: Colors.white,
-            key: _scaffoldKey,
-            appBar: AppBar(
-              elevation: 0.0,
-              forceMaterialTransparency: true,
-              title: Text(
-                AppLocalizations.of(context)!.translate('editTransaction'),
-                style: const TextStyle(
-                    //color: Colors.black,
-                    ),
-              ),
-              iconTheme: const IconThemeData(
-                  //color: Colors.black,
-                  ),
+            body: Center(
+              child: CircularProgressIndicator(color: colorScheme.primary),
             ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                updateTransaction(argTransaction);
-              },
-              icon: const Icon(Icons.check),
-              label: Text(
-                  AppLocalizations.of(context)!.translate('editTransaction')),
-            ),
-            body: SingleChildScrollView(
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 0, 0, 48),
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              ActionChip(
-                                  backgroundColor: _transType == "credit"
-                                      ? Colors.green.shade500
-                                      : Colors.black38,
-                                  avatar: CircleAvatar(
-                                    backgroundColor: Colors.grey.shade200,
-                                    child: const Icon(
-                                      Icons.send,
-                                      color: Colors.blueAccent,
-                                      size: 16.0,
-                                    ),
-                                  ),
-                                  label: Text(AppLocalizations.of(context)!
-                                      .translate('creditGiven')),
-                                  onPressed: () {
-                                    setState(() {
-                                      _transType = "credit";
-                                    });
-                                  })
-                            ],
-                          ),
-                          const Padding(padding: EdgeInsets.all(8.0)),
-                          Column(
-                            children: <Widget>[
-                              ActionChip(
-                                  backgroundColor: _transType == "payment"
-                                      ? Colors.green.shade500
-                                      : Colors.black38,
-                                  avatar: CircleAvatar(
-                                    backgroundColor: Colors.grey.shade200,
-                                    child: const Icon(
-                                      Icons.receipt,
-                                      color: Colors.redAccent,
-                                      size: 16.0,
-                                    ),
-                                  ),
-                                  label: Text(AppLocalizations.of(context)!
-                                      .translate('paymentReceived')),
-                                  onPressed: () {
-                                    setState(() {
-                                      _transType = "payment";
-                                    });
-                                  })
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      AutoCompleteTextField<Customer>(
-                        key: _customerSuggestionKey,
-                        clearOnSubmit: false,
-                        suggestions: customers,
-                        controller: _customersField,
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.person),
-                          hintText: AppLocalizations.of(context)!
-                              .translate('customerNameLabelMeta'),
-                          labelText: AppLocalizations.of(context)!
-                              .translate('customerNameLabel'),
-                        ),
-                        itemFilter: (item, query) {
-                          _customerId = null;
-                          return item.name!
-                              .toLowerCase()
-                              .startsWith(query.toLowerCase());
-                        },
-                        itemSorter: (a, b) {
-                          return a.name!.compareTo(b.name!);
-                        },
-                        itemSubmitted: (item) {
-                          _customersField.text = item.name!;
-                          _customerId = item.id;
-                        },
-                        itemBuilder: (context, item) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(item.name!),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      TextFormField(
-                        initialValue: doubleWithoutDecimalToString(
-                            argTransaction.amount!),
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.monetization_on),
-                          hintText: AppLocalizations.of(context)!
-                              .translate('transactionAmountLabelMeta'),
-                          labelText: AppLocalizations.of(context)!
-                              .translate('transactionAmountLabel'),
-                        ),
-                        validator: (input) {
-                          if (input == null || input.isEmpty) {
-                            return AppLocalizations.of(context)!
-                                .translate('transactionAmountError');
-                          }
+          );
+        }
 
-                          if (double.tryParse(input) == null) {
-                            return AppLocalizations.of(context)!
-                                .translate('transactionAmountErrorNumber');
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.number,
-                        onSaved: (input) => _amount = double.parse(input!),
-                      ),
-                      TextFormField(
-                        initialValue: argTransaction.comment,
-                        decoration: InputDecoration(
-                          icon: const Icon(Icons.comment),
-                          hintText: AppLocalizations.of(context)!
-                              .translate('transactionCommentLabelMeta'),
-                          labelText: AppLocalizations.of(context)!
-                              .translate('transactionCommentLabel'),
-                        ),
-                        maxLines: 3,
-                        onSaved: (input) => _comment = input,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 24, 8, 24),
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                              backgroundColor: Colors.grey),
-                          onPressed: () {
-                            _selectDate(context);
-                          },
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.calendar_today,
-                                //color: Colors.grey.shade600,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(formatDate(context, _date)['full']!),
-                            ],
-                          ),
-                        ),
-                      ),
-                      transactionAttachmentWidget(argTransaction.attachment),
-                    ],
-                  ),
-                ),
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                AppLocalizations.of(context)!
+                    .translate('errorLoadingCustomers'),
+                style: TextStyle(color: colorScheme.error),
               ),
             ),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+
+        final customers = snapshot.data ?? [];
+        Customer? selectedCustomer;
+        if (_customerId != null) {
+          selectedCustomer = customers.firstWhere(
+            (c) => c.id == _customerId,
+            orElse: () => Customer(),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            forceMaterialTransparency: true,
+            title: Text(
+              AppLocalizations.of(context)!.translate('editTransaction'),
+              style: TextStyle(color: colorScheme.onSurface),
+            ),
+            iconTheme: IconThemeData(color: colorScheme.onSurface),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: colorScheme.primary,
+            onPressed: _updateTransaction,
+            icon: Icon(Icons.check, color: colorScheme.onPrimary),
+            label: Text(
+              AppLocalizations.of(context)!.translate('saveChanges'),
+              style: TextStyle(color: colorScheme.onPrimary),
+            ),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTransactionTypeChips(theme),
+                  const SizedBox(height: 16),
+                  _buildCustomerInfo(selectedCustomer, theme),
+                  const SizedBox(height: 16),
+                  _buildAmountField(theme),
+                  const SizedBox(height: 16),
+                  _buildCommentField(theme),
+                  const SizedBox(height: 16),
+                  _buildDatePicker(theme),
+                  const SizedBox(height: 16),
+                  _buildAttachmentSection(theme),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
 
-  Widget transactionAttachmentWidget(String? image) {
-    Uint8List? transactionAttachment;
-    if (image != null) {
-      transactionAttachment = const Base64Decoder().convert(image);
-    }
-
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: _attachment == null
-              ? transactionAttachment == null
-                  ? const Image(image: AssetImage('assets/images/no_image.jpg'))
-                  : Image.memory(transactionAttachment, width: 60)
-              : Image.file(_attachment!),
+  Widget _buildTransactionTypeChips(ThemeData theme) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        ChoiceChip(
+          selected: _transType == "credit",
+          label: Text(AppLocalizations.of(context)!.translate('creditGiven')),
+          selectedColor: theme.colorScheme.primary,
+          onSelected: (selected) {
+            if (selected) setState(() => _transType = "credit");
+          },
         ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: TextButton(
-            onPressed: () {
-              showUploadDialog();
-            },
-            child: Text(AppLocalizations.of(context)!
-                .translate('transactionImageLabel')),
+        ChoiceChip(
+          selected: _transType == "payment",
+          label:
+              Text(AppLocalizations.of(context)!.translate('paymentReceived')),
+          selectedColor: theme.colorScheme.primary,
+          onSelected: (selected) {
+            if (selected) setState(() => _transType = "payment");
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomerInfo(Customer? customer, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline),
+        color: theme.colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.person, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 16),
+          Text(
+            customer?.name ?? 'No customer selected',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAmountField(ThemeData theme) {
+    return TextFormField(
+      initialValue: _amount?.toString(),
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!
+            .translate('transactionAmountLabelMeta'),
+        labelText:
+            AppLocalizations.of(context)!.translate('transactionAmountLabel'),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.colorScheme.outline),
+        ),
+      ),
+      style: TextStyle(color: theme.colorScheme.onSurface),
+      validator: (input) {
+        if (input == null || input.isEmpty) {
+          return AppLocalizations.of(context)!
+              .translate('transactionAmountError');
+        }
+        if (double.tryParse(input) == null || double.parse(input) <= 0) {
+          return AppLocalizations.of(context)!
+              .translate('transactionAmountErrorNumber');
+        }
+        return null;
+      },
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      onSaved: (input) => _amount = double.parse(input!),
+    );
+  }
+
+  Widget _buildCommentField(ThemeData theme) {
+    return TextFormField(
+      initialValue: _comment,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!
+            .translate('transactionCommentLabelMeta'),
+        labelText:
+            AppLocalizations.of(context)!.translate('transactionCommentLabel'),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.colorScheme.outline),
+        ),
+      ),
+      style: TextStyle(color: theme.colorScheme.onSurface),
+      maxLines: 3,
+      onSaved: (input) => _comment = input,
+    );
+  }
+
+  Widget _buildDatePicker(ThemeData theme) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        backgroundColor: theme.colorScheme.surfaceVariant,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: theme.colorScheme.outline),
+        ),
+      ),
+      onPressed: () => _selectDate(context),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 16),
+          Text(
+            formatDate(context, _date)['full']!,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttachmentSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.translate('transactionImageLabel'),
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: _showUploadDialog,
+          child: Container(
+            height: 150,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.colorScheme.outline,
+                width: 1,
+              ),
+            ),
+            child: _attachment != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(_attachment!, fit: BoxFit.cover),
+                  )
+                : _existingAttachment != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.memory(_existingAttachment!,
+                            fit: BoxFit.cover),
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_a_photo,
+                              size: 48,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              AppLocalizations.of(context)!
+                                  .translate('addImage'),
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
           ),
         ),
       ],
     );
   }
 
-  void showUploadDialog() {
+  void _showUploadDialog() {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text(
-              AppLocalizations.of(context)!.translate('transactionImageLabel')),
-          children: <Widget>[
-            SimpleDialogOption(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromCamera')),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        backgroundColor: theme.cardColor,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.translate('addImage'),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('camera');
-              },
-            ),
-            SimpleDialogOption(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(AppLocalizations.of(context)!
-                    .translate('uploadFromGallery')),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: Icon(
+                        Icons.camera_alt,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      label: Text(
+                        AppLocalizations.of(context)!.translate('fromCamera'),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: theme.dividerColor),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _getImageFrom('camera');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: Icon(
+                        Icons.photo_library,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                      label: Text(
+                        AppLocalizations.of(context)!.translate('fromGallery'),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _getImageFrom('gallery');
+                      },
+                    ),
+                  ),
+                ],
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                getImageFrom('gallery');
-              },
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    _customersField.dispose();
-    super.dispose();
-  }
-
-  void updateTransaction(Transaction transaction) async {
+  Future<void> _updateTransaction() async {
     final formState = _formKey.currentState;
 
-    if (formState!.validate()) {
-      formState.save();
+    if (formState?.validate() ?? false) {
+      formState?.save();
 
       if (_customerId == null) {
-        final snackBar = SnackBar(
-            content: Row(children: <Widget>[
-          const Icon(
-            Icons.warning,
-            color: Colors.redAccent,
-          ),
-          Padding(
-              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-              child: Text(AppLocalizations.of(context)!
-                  .translate('customerSelectionLabel')))
-        ]));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _showErrorSnackbar(
+            AppLocalizations.of(context)!.translate('customerSelectionLabel'));
         return;
       }
 
       if (_attachment != null && _attachment!.lengthSync() > 2000000) {
-        final snackBar = SnackBar(
-            content: Row(children: <Widget>[
-          const Icon(
-            Icons.warning,
-            color: Colors.redAccent,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-            child:
-                Text(AppLocalizations.of(context)!.translate('imageSizeError')),
-          )
-        ]));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _showErrorSnackbar(
+            AppLocalizations.of(context)!.translate('imageSizeError'));
         return;
       }
 
-      transaction.ttype = _transType;
-      transaction.amount = _amount!;
-      transaction.comment = _comment;
-      transaction.date = _date;
+      final transaction = widget.transaction
+        ..ttype = _transType
+        ..amount = _amount!
+        ..comment = _comment
+        ..date = _date
+        ..uid = _customerId;
 
       if (_attachment != null) {
-        String base64Image = base64Encode(_attachment!.readAsBytesSync());
-        transaction.attachment = base64Image;
-      }
-
-      if (_customerId != null) {
-        transaction.uid = _customerId!;
+        transaction.attachment = base64Encode(_attachment!.readAsBytesSync());
+      } else if (_existingAttachment == null) {
+        transaction.attachment = null;
       }
 
       try {
-        await transactionBloc.updateTransaction(transaction);
+        await _transactionBloc.updateTransaction(transaction);
+        if (!mounted) return;
 
         Navigator.of(context).pop();
         Navigator.pushReplacement(
@@ -471,8 +522,8 @@ class _EditTransactionState extends State<EditTransaction> {
           ),
         );
       } catch (e) {
-        const snackBar = SnackBar(content: Text('Error updating transaction'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _showErrorSnackbar(
+            AppLocalizations.of(context)!.translate('transactionError'));
       }
     }
   }

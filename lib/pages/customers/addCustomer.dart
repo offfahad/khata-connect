@@ -80,7 +80,7 @@ class _AddCustomerState extends State<AddCustomer> {
       key: _scaffoldKey,
       appBar: AppBar(
         elevation: 0.0,
-        backgroundColor: Colors.transparent,
+        forceMaterialTransparency: true,
         title: Text(
           AppLocalizations.of(context)!.translate('addCustomer'),
           style: const TextStyle(
@@ -88,34 +88,34 @@ class _AddCustomerState extends State<AddCustomer> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
         actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: theme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(color: theme.colorScheme.secondary),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              ),
-              label: Text(
-                AppLocalizations.of(context)!.translate('importContacts'),
-                style: const TextStyle(fontSize: 14),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ImportContacts()),
-                );
-              },
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.only(right: 16),
+          //   child: TextButton.icon(
+          //     style: TextButton.styleFrom(
+          //       foregroundColor: Colors.white,
+          //       backgroundColor: theme.primaryColor,
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8),
+          //         side: BorderSide(color: theme.colorScheme.secondary),
+          //       ),
+          //       padding:
+          //           const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          //     ),
+          //     label: Text(
+          //       AppLocalizations.of(context)!.translate('importContacts'),
+          //       style: const TextStyle(fontSize: 14),
+          //     ),
+          //     onPressed: () {
+          //       Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => const ImportContacts()),
+          //       );
+          //     },
+          //   ),
+          // ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

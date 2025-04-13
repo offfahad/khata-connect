@@ -46,10 +46,6 @@ class _DeleteBusinessState extends State<DeleteBusiness> {
           style: TextStyle(color: colorScheme.onSurface),
         ),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: _buildBody(colorScheme, theme),
       bottomNavigationBar:
@@ -196,20 +192,51 @@ class _DeleteBusinessState extends State<DeleteBusiness> {
   }
 
   Future<void> _deleteCompany() async {
+    if (!mounted || _businesses.isEmpty) return;
+
     setState(() => _isDeleting = true);
     try {
-      final id = _businesses[_selectedIndex].id!;
+      final businessToDelete = _businesses[_selectedIndex];
+      final id = businessToDelete.id!;
       if (id == 0) return;
 
+      // Delete the business
       await _businessBloc.deleteBusinessById(id);
-      changeSelectedBusiness(context, 0);
 
-      if (!mounted) return;
-      Navigator.of(context).pop();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MyHomePage()),
-      );
+      // Update local state immediately
+      final updatedBusinesses = List<Business>.from(_businesses)
+        ..removeAt(_selectedIndex);
+
+      // Select first available business or default to 0
+      final newSelectedIndex = updatedBusinesses.isNotEmpty
+          ? 0
+          : 0; // Default to 0 if no businesses left
+
+      // Update selected business
+      await changeSelectedBusiness(
+          context,
+          updatedBusinesses.isNotEmpty
+              ? updatedBusinesses[newSelectedIndex].id!
+              : 0);
+
+      if (mounted) {
+        setState(() {
+          _businesses = updatedBusinesses;
+          _selectedIndex = newSelectedIndex;
+        });
+
+        // Navigate back to home with replacement
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => MyHomePage()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting business: ${e.toString()}')),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isDeleting = false);

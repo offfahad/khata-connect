@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:khata_connect/helpers/conversion.dart';
+import 'package:khata_connect/helpers/generateCustomerTransaction.dart';
 import 'package:khata_connect/main.dart';
 import 'package:khata_connect/pages/customers/editCustomer.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -13,6 +15,8 @@ import 'package:khata_connect/pages/transactions/addTransaction.dart';
 import 'package:khata_connect/pages/transactions/singleTransaction.dart';
 import 'package:khata_connect/blocs/customerBloc.dart';
 import 'package:khata_connect/blocs/transactionBloc.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SingleCustomer extends StatefulWidget {
   final int customerId;
@@ -26,7 +30,7 @@ class SingleCustomer extends StatefulWidget {
 class _SingleCustomerState extends State<SingleCustomer> {
   final CustomerBloc customerBloc = CustomerBloc();
   final TransactionBloc transactionBloc = TransactionBloc();
-  final bool _absorbing = false;
+  bool _absorbing = false;
 
   void _showDeleteDialog(Customer customer) {
     final theme = Theme.of(context);
@@ -74,6 +78,49 @@ class _SingleCustomerState extends State<SingleCustomer> {
         );
       },
     );
+  }
+
+  Future<void> generatePdf() async {
+    if (!mounted) return;
+
+    setState(() {
+      _absorbing = true;
+    });
+
+    try {
+      final file = await buildTransactionPdf();
+      if (file != null) {
+        await OpenFile.open(file.path);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate PDF: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _absorbing = false;
+        });
+      }
+    }
+  }
+
+  Future<File?> buildTransactionPdf() async {
+    try {
+      // Generate the PDF bytes
+      Uint8List pdfBytes =
+          await generateCustomerTransactionPdf(widget.customerId);
+
+      // Save to temporary directory (works on all platforms)
+      final output = await getTemporaryDirectory();
+      final file = File(
+          '${output.path}/transaction_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await file.writeAsBytes(pdfBytes);
+      return file;
+    } catch (e) {
+      print('PDF generation error: $e');
+      return null;
+    }
   }
 
   @override
@@ -134,7 +181,7 @@ class _SingleCustomerState extends State<SingleCustomer> {
                             padding: const EdgeInsets.only(left: 4.0),
                             child: FloatingActionButton.extended(
                               icon: const Icon(Icons.arrow_downward, size: 18),
-                              backgroundColor: Colors.green.shade600,
+                              backgroundColor: theme.primaryColor,
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -305,25 +352,9 @@ class _SingleCustomerState extends State<SingleCustomer> {
                                 Row(
                                   children: [
                                     TextButton.icon(
-                                      onPressed: () {
-                                        // Share functionality
+                                      onPressed: () async {
+                                        await generatePdf();
                                       },
-                                      icon: Icon(
-                                        Icons.share,
-                                        size: 16.0,
-                                        color: Colors.green.shade600,
-                                      ),
-                                      label: Text(
-                                        AppLocalizations.of(context)!
-                                            .translate('shareText'),
-                                        style: TextStyle(
-                                          color: Colors.green.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                    TextButton.icon(
-                                      onPressed: () {},
                                       icon: Icon(
                                         Icons.picture_as_pdf,
                                         size: 16.0,

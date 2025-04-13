@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -22,43 +24,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to capture transaction receipts and profile pictures.</string>
-
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs photo library access to upload transaction images and profile photos.</string>
-	<key>NSDocumentsFolderUsageDescription</key>
-	<string>This app needs access to your documents folder to save generated PDFs of transactions.</string>
-
-	<key>NSDownloadsFolderUsageDescription</key>
-	<string>This app needs access to downloads to save PDF files.</string>
-
-	<key>NSContactsUsageDescription</key>
-	<string>This app needs contacts access to manage transaction-related contacts.</string>
-
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>http</string>
@@ -66,6 +31,36 @@
 		<string>tel</string>
 		<string>mailto</string>
 	</array>
-
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to capture transaction receipts and profile pictures. All captured data stays securely within the app.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app requires access to your contacts to help manage transaction-related people. Your contact information is never shared and remains inside the app.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>This app requires access to your documents folder to generate and save PDF files of your transactions. All files remain private and within the app.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>This app requires access to your downloads folder to save PDF files. Your data stays secure and is never uploaded or shared.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to upload transaction-related images and profile photos. No data is shared externally.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
 </dict>
 </plist>

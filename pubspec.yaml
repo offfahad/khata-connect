@@ -50,8 +50,9 @@ dependencies:
   permission_handler: 
   flutter_platform_widgets:
   flutter_native_image: 
-  flutter_launcher_icons: 
   loading_animation_widget:
+  flutter_native_splash: 
+  change_app_package_name: 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -59,8 +60,27 @@ dependencies:
 
 dev_dependencies:
   intl_translation: 
+  flutter_launcher_icons:
   flutter_test:
     sdk: flutter
+
+flutter_native_splash:
+  android: true
+  ios: true
+  color: "#ffffff" # background color
+  image: "assets/images/logo.png"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  remove_alpha_ios : true # remove alpha channel from iOS icon
+  adaptive_icon_background: "#ffffff" # android adaptive icon background color
+  adaptive_icon_foreground: "assets/images/logo.png" # android adaptive icon foreground image
+  adaptive_icon: true # android adaptive icon
+
+  image_path_android: "assets/images/logo.png" # android icon image path
+  image_path_ios: "assets/images/khata-connect-logo.png" # iOS icon image path
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -86,11 +106,10 @@ flutter:
     - assets/i18n/ur.json
     - assets/i18n/ne.json
     - assets/images/no_image.jpg
+    - assets/images/khata-connect-logo.png
     - assets/images/logo.png
+    - assets/images/logo_crop.png
     - assets/images/noimage_person.png
-    - assets/images/google_logo.png
-    - assets/images/logo-long.png
-    - assets/images/logo-512.png
     - assets/images/en.png
     - assets/images/ne.png
     - assets/images/ur.png
@@ -101,7 +120,6 @@ flutter:
     - assets/images/currency.png
     - assets/images/backup.png
     - assets/images/business.png
-    - assets/images/data-copy.jpg
     - assets/images/cv/email.png
     - assets/images/cv/phone.png
     - assets/images/cv/location.png

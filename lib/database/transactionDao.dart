@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:khata_connect/database/database.dart';
 import 'package:khata_connect/models/transaction.dart';

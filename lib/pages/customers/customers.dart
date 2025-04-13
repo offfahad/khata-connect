@@ -170,6 +170,7 @@ class _CustomersState extends State<Customers> {
       await file.writeAsBytes(pdf);
       OpenFile.open(file.path);
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error generating PDF: $e')),
       );

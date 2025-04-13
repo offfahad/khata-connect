@@ -5,7 +5,7 @@
   "more": "More",
   "searchCustomers": "Search Customers",
   "addCustomer": "Add Customer",
-  "appInfo": "Khata Connect \n Small Business Credit Management Application",
+  "appInfo": "Small Business Credit Management Application",
   "businessInfo": "Business Information",
   "businessInfoMeta": "Setup your business informations.",
   "backupInfo": "Backup",
@@ -94,5 +94,14 @@
   "confirmDelete": "Confirm Deletion",
   "deleteCompanyWarning": "Are you sure you want to delete this business? This action cannot be undone.",
   "cancel": "Cancel",
-  "delete": "Delete"
+  "delete": "Delete",
+  "setting": "Setting",
+  "fromGallery": "From Gallery",
+  "fromCamera": "From Camera",
+  "support": "Support",
+  "supportMeta": "Contact developer for help",
+  "privacyPolicy": "Privacy Policy",
+  "privacyPolicyMeta": "View our data usage policy",
+  "termsOfUse": "Terms of Use",
+  "termsOfUseMeta": "App usage guidelines"
 }

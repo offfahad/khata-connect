@@ -71,11 +71,12 @@ class _ImportContactsState extends State<ImportContacts> {
       showPlatformDialog(
         context: context,
         builder: (context) => PlatformAlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to load contacts. Please try again later.'),
+          title: const Text('Error'),
+          content:
+              const Text('Failed to load contacts. Please try again later.'),
           actions: [
             PlatformDialogAction(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -154,11 +155,11 @@ class _ImportContactsState extends State<ImportContacts> {
       showPlatformDialog(
         context: context,
         builder: (context) => PlatformAlertDialog(
-          title: Text('Permission Denied'),
-          content: Text('Access to contact data denied'),
+          title: const Text('Permission Denied'),
+          content: const Text('Access to contact data denied'),
           actions: [
             PlatformDialogAction(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -170,11 +171,11 @@ class _ImportContactsState extends State<ImportContacts> {
       showPlatformDialog(
         context: context,
         builder: (context) => PlatformAlertDialog(
-          title: Text('Permission Restricted'),
-          content: Text('Contact data access restricted'),
+          title: const Text('Permission Restricted'),
+          content: const Text('Contact data access restricted'),
           actions: [
             PlatformDialogAction(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -187,122 +188,118 @@ class _ImportContactsState extends State<ImportContacts> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        //backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            AppLocalizations.of(context)!.translate('importContacts'),
-            style: const TextStyle(
-                //color: Colors.black,
-                ),
-          ),
-          //iconTheme: const IconThemeData(
-          //  color: Colors.black, // Change color here
-          //),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0.0,
+        forceMaterialTransparency: true,
+        title: Text(
+          AppLocalizations.of(context)!.translate('importContacts'),
+          style: const TextStyle(
+              //color: Colors.black,
+              ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            importContacts();
-          },
-          icon: const Icon(Icons.check),
-          label:
-              Text(AppLocalizations.of(context)!.translate('importContacts')),
-        ),
-        body: !_hasPermission || contactsList.isEmpty
-            ? Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width,
-                  height: 280,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.secondary),
-                  ),
+        //iconTheme: const IconThemeData(
+        //  color: Colors.black, // Change color here
+        //),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          importContacts();
+        },
+        icon: const Icon(Icons.check),
+        label: Text(AppLocalizations.of(context)!.translate('importContacts')),
+      ),
+      body: !_hasPermission || contactsList.isEmpty
+          ? Center(
+              child: Container(
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: 280,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).colorScheme.secondary),
                 ),
-              )
-            : Form(
-                key: _formKey,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: contactsList.length,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    UserContact contact = contactsList[index];
+              ),
+            )
+          : Form(
+              key: _formKey,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: contactsList.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext ctx, int index) {
+                  UserContact contact = contactsList[index];
 
-                    final avatar = contact.avatar!.isNotEmpty
-                        ? contact.avatar
-                        : Uint8List(0); // Default empty image if no avatar
+                  final avatar = contact.avatar!.isNotEmpty
+                      ? contact.avatar
+                      : Uint8List(0); // Default empty image if no avatar
 
-                    return Container(
-                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 4),
-                      padding: const EdgeInsets.all(4),
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            if (!contactsIndexToAdd.contains(index)) {
-                              contactsIndexToAdd.add(index);
-                            } else {
-                              contactsIndexToAdd.remove(index);
-                            }
-                          });
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Checkbox(
-                              value: contactsIndexToAdd.contains(index),
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  if (value == true) {
-                                    contactsIndexToAdd.add(index);
-                                  } else {
-                                    contactsIndexToAdd.remove(index);
-                                  }
-                                });
-                              },
-                            ),
-                            const SizedBox(width: 16),
-                            CircleAvatar(
-                              radius: 24,
-                              backgroundColor: Colors.transparent,
-                              child: ClipOval(
-                                child: Container(
-                                  color: Colors.grey.shade200,
-                                  child: Image.memory(
-                                    avatar!,
-                                    height: 54,
-                                    width: 54,
-                                    fit: BoxFit.cover,
-                                  ),
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(0, 0, 0, 4),
+                    padding: const EdgeInsets.all(4),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          if (!contactsIndexToAdd.contains(index)) {
+                            contactsIndexToAdd.add(index);
+                          } else {
+                            contactsIndexToAdd.remove(index);
+                          }
+                        });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Checkbox(
+                            value: contactsIndexToAdd.contains(index),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  contactsIndexToAdd.add(index);
+                                } else {
+                                  contactsIndexToAdd.remove(index);
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 16),
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.transparent,
+                            child: ClipOval(
+                              child: Container(
+                                color: Colors.grey.shade200,
+                                child: Image.memory(
+                                  avatar!,
+                                  height: 54,
+                                  width: 54,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(contact.name ?? 'No Name'),
-                                const SizedBox(height: 8),
-                                Text(
-                                  contact.phone ?? 'No Phone',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    //color: Colors.grey,
-                                  ),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(contact.name ?? 'No Name'),
+                              const SizedBox(height: 8),
+                              Text(
+                                contact.phone ?? 'No Phone',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  //color: Colors.grey,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-      ),
+            ),
     );
   }
 
@@ -339,11 +336,12 @@ class _ImportContactsState extends State<ImportContacts> {
       showPlatformDialog(
         context: context,
         builder: (context) => PlatformAlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to import contacts. Please try again later.'),
+          title: const Text('Error'),
+          content:
+              const Text('Failed to import contacts. Please try again later.'),
           actions: [
             PlatformDialogAction(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context);
               },

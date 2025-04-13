@@ -11,6 +11,13 @@ class AppStateNotifier extends ChangeNotifier {
   String currency = "Rs";
   String calendar = "en";
 
+  // Add initialization method
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    currency = prefs.getString('currency') ?? "Rs";
+    // Load other preferences if needed
+  }
+
   void updateLocale(String locale) {
     appLocale = locale;
     notifyListeners();
@@ -18,6 +25,10 @@ class AppStateNotifier extends ChangeNotifier {
 
   void updateSelectedBusiness(int bid) {
     selectedBusiness = bid;
+    notifyListeners();
+  }
+
+  void refresh() {
     notifyListeners();
   }
 
@@ -60,8 +71,11 @@ Future<void> changeSelectedBusiness(BuildContext context, int id) async {
   await prefs.setInt(key, id);
 
   // Update app state
-  Provider.of<AppStateNotifier>(context, listen: false)
-      .updateSelectedBusiness(id);
+  final notifier = Provider.of<AppStateNotifier>(context, listen: false);
+  notifier.updateSelectedBusiness(id);
+
+  // Force rebuild of dependent widgets
+  notifier.refresh();
 }
 
 Future<void> changeCurrency(BuildContext context, String currency) async {
