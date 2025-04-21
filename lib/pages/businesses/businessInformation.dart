@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:open_file/open_file.dart';
@@ -280,15 +279,22 @@ class _BusinessInformationState extends State<BusinessInformation> {
       );
 
       if (image != null) {
-        File imageFile = File(image.path);
-        final result = await FlutterNativeImage.compressImage(
-          imageFile.path,
+        final File originalFile = File(image.path);
+
+        final List<int>? compressedBytes =
+            await FlutterImageCompress.compressWithFile(
+          originalFile.absolute.path,
           quality: 80,
-          targetWidth: 800,
-          targetHeight: 800,
+          minWidth: 800,
+          keepExif: true,
         );
 
-        final imageBase64 = base64Encode(await result.readAsBytes());
+        if (compressedBytes == null) {
+          _showErrorDialog('Image compression failed.');
+          return;
+        }
+
+        final imageBase64 = base64Encode(compressedBytes);
 
         setState(() {
           _businessInfo!.logo = imageBase64;

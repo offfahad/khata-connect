@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/helpers/conversion.dart';
 import 'package:khata_connect/helpers/appLocalizations.dart';
@@ -93,27 +93,34 @@ class _EditTransactionState extends State<EditTransaction> {
 
       if (image == null) return;
 
-      final properties =
-          await FlutterNativeImage.getImageProperties(image.path);
-      final compressedImage = await FlutterNativeImage.compressImage(
-        image.path,
+      final File originalFile = File(image.path);
+
+      final compressedBytes = await FlutterImageCompress.compressWithFile(
+        originalFile.absolute.path,
         quality: 80,
-        targetWidth: 800,
-        targetHeight: (properties.height! * 800 / properties.width!).round(),
+        minWidth: 800,
+        keepExif: true,
       );
 
-      if (compressedImage.lengthSync() > 2000000) {
+      if (compressedBytes == null || compressedBytes.length > 2000000) {
         _showErrorSnackbar(
-            AppLocalizations.of(context)!.translate('imageSizeError'));
+          AppLocalizations.of(context)!.translate('imageSizeError'),
+        );
         return;
       }
 
+      final compressedFile = File(
+          '${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await compressedFile.writeAsBytes(compressedBytes);
+
       setState(() {
-        _attachment = compressedImage;
+        _attachment = compressedFile;
         _existingAttachment = null;
       });
     } catch (e) {
-      _showErrorSnackbar(AppLocalizations.of(context)!.translate('imageError'));
+      _showErrorSnackbar(
+        AppLocalizations.of(context)!.translate('imageError'),
+      );
     }
   }
 

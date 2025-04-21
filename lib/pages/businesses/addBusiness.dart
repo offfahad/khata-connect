@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/pages/businesses/deleteBusiness.dart';
 
@@ -42,14 +42,17 @@ class _AddBusinessState extends State<AddBusiness> {
 
     if (image == null) return;
 
-    ImageProperties properties =
-        await FlutterNativeImage.getImageProperties(image.path);
-    File rawImage = await FlutterNativeImage.compressImage(image.path,
-        quality: 80,
-        targetWidth: 512,
-        targetHeight: (properties.height! * 512 / properties.width!).round());
+    final File originalFile = File(image.path);
 
-    if (rawImage.lengthSync() > 200000) {
+    final List<int>? compressedBytes =
+        await FlutterImageCompress.compressWithFile(
+      originalFile.absolute.path,
+      quality: 80,
+      minWidth: 512,
+      keepExif: true,
+    );
+
+    if (compressedBytes == null || compressedBytes.length > 200000) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(
           children: <Widget>[
@@ -57,7 +60,8 @@ class _AddBusinessState extends State<AddBusiness> {
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: Text(
-                  AppLocalizations.of(context)!.translate('imageSizeError')),
+                AppLocalizations.of(context)!.translate('imageSizeError'),
+              ),
             ),
           ],
         ),
@@ -69,8 +73,13 @@ class _AddBusinessState extends State<AddBusiness> {
       return;
     }
 
+    final File compressedImage = File(
+      '${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+    await compressedImage.writeAsBytes(compressedBytes);
+
     setState(() {
-      _logo = rawImage;
+      _logo = compressedImage;
     });
   }
 

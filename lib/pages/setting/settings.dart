@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:khata_connect/helpers/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 

@@ -15,7 +15,6 @@ class AppLocalizations {
 
   static const AppLocalizationsDelegate delegate = AppLocalizationsDelegate();
 
-  // Ensure this is a getter method for appLocale if you plan to use it
   // You might want to remove or modify this if it’s not used
   String get appLocale => locale.toString();
 
@@ -23,8 +22,8 @@ class AppLocalizations {
 
   Future<bool> load() async {
     try {
-      String jsonString =
-          await rootBundle.loadString('assets/i18n/${locale.languageCode}.json');
+      String jsonString = await rootBundle
+          .loadString('assets/i18n/${locale.languageCode}.json');
       Map<String, dynamic> jsonMap = json.decode(jsonString);
 
       _localizedStrings = jsonMap.map((key, value) {

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/blocs/customerBloc.dart';
 import 'package:khata_connect/pages/customers/singleCustomer.dart';
@@ -36,21 +36,29 @@ class _EditCustomerState extends State<EditCustomer> {
 
       if (pickedFile == null) return;
 
-      final properties =
-          await FlutterNativeImage.getImageProperties(pickedFile.path);
-      final rawImage = await FlutterNativeImage.compressImage(
-        pickedFile.path,
+      final File originalFile = File(pickedFile.path);
+
+      // Compress the image
+      final List<int>? compressedBytes =
+          await FlutterImageCompress.compressWithFile(
+        originalFile.absolute.path,
         quality: 80,
-        targetWidth: 512,
-        targetHeight: (properties.height! * 512 / properties.width!).round(),
+        minWidth: 512,
+        keepExif: true,
       );
 
-      if (rawImage.lengthSync() > 200000) {
+      if (compressedBytes == null || compressedBytes.length > 200000) {
         _showSnackBar('Image size exceeds limit');
         return;
       }
 
-      setState(() => _image = rawImage);
+      // Save compressed bytes as a new file
+      final File compressedImage = File(
+        '${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      await compressedImage.writeAsBytes(compressedBytes);
+
+      setState(() => _image = compressedImage);
     } catch (e) {
       _showSnackBar('Error selecting image: ${e.toString()}');
     }
@@ -77,7 +85,6 @@ class _EditCustomerState extends State<EditCustomer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
     final customer = widget.customer;
 
     return Scaffold(

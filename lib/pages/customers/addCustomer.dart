@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:khata_connect/main.dart';
 import 'package:khata_connect/pages/contacts/importContacts.dart';
@@ -36,16 +36,18 @@ class _AddCustomerState extends State<AddCustomer> {
 
     if (image == null) return;
 
-    final ImageProperties properties =
-        await FlutterNativeImage.getImageProperties(image.path);
-    final File rawImage = await FlutterNativeImage.compressImage(
-      image.path,
+    final File originalFile = File(image.path);
+
+    // Compress the image with desired width and quality
+    final List<int>? compressedBytes =
+        await FlutterImageCompress.compressWithFile(
+      originalFile.absolute.path,
       quality: 80,
-      targetWidth: 512,
-      targetHeight: (properties.height! * 512 / properties.width!).round(),
+      minWidth: 512, // Width you were targeting
+      keepExif: true,
     );
 
-    if (rawImage.lengthSync() > 200000) {
+    if (compressedBytes == null || compressedBytes.length > 200000) {
       final snackBar = SnackBar(
         content: Row(
           children: <Widget>[
@@ -53,7 +55,8 @@ class _AddCustomerState extends State<AddCustomer> {
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
               child: Text(
-                  AppLocalizations.of(context)!.translate('imageSizeError')),
+                AppLocalizations.of(context)!.translate('imageSizeError'),
+              ),
             ),
           ],
         ),
@@ -66,8 +69,14 @@ class _AddCustomerState extends State<AddCustomer> {
       return;
     }
 
+    // Save the compressed image to a new file
+    final File compressedImage = File(
+      '${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+    await compressedImage.writeAsBytes(compressedBytes);
+
     setState(() {
-      _image = rawImage;
+      _image = compressedImage;
     });
   }
 

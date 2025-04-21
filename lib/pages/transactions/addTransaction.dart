@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:khata_connect/blocs/customerBloc.dart';
 import 'package:khata_connect/blocs/transactionBloc.dart';
 import 'package:khata_connect/pages/customers/singleCustomer.dart';
@@ -96,26 +96,36 @@ class _AddTransactionState extends State<AddTransaction> {
 
       if (image == null) return;
 
-      ImageProperties properties =
-          await FlutterNativeImage.getImageProperties(image.path);
-      File compressedImage = await FlutterNativeImage.compressImage(
-        image.path,
+      final File originalFile = File(image.path);
+
+      // Compress image with target width and quality
+      final compressedBytes = await FlutterImageCompress.compressWithFile(
+        originalFile.absolute.path,
         quality: 80,
-        targetWidth: 800,
-        targetHeight: (properties.height! * 800 / properties.width!).round(),
+        minWidth: 800, // No height required; aspect ratio is preserved
+        keepExif: true,
       );
 
-      if (compressedImage.lengthSync() > 2000000) {
+      if (compressedBytes == null || compressedBytes.length > 2000000) {
         _showErrorSnackbar(
-            AppLocalizations.of(context)!.translate('imageSizeError'));
+          AppLocalizations.of(context)!.translate('imageSizeError'),
+        );
         return;
       }
+
+      // Save compressed image to a new file
+      final File compressedImage = File(
+        '${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+      await compressedImage.writeAsBytes(compressedBytes);
 
       setState(() {
         _attachment = compressedImage;
       });
     } catch (e) {
-      _showErrorSnackbar(AppLocalizations.of(context)!.translate('imageError'));
+      _showErrorSnackbar(
+        AppLocalizations.of(context)!.translate('imageError'),
+      );
     }
   }
 

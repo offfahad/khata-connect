@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 const Color xDarkBlue = Color(0xFF273c75);
 const Color xDarkBlueText = Color(0xFF7f8fa6);
@@ -10,7 +9,6 @@ const Color xPlainTextRed = Color(0xFFe84118);
 const Color xPlainTextGreen = Colors.green;
 
 const Color xLightWhite = Color(0xFFF1F1F1);
-
 const themeStatus = 'themeStatus';
 
 const String portfolioUrl = 'https://offfahad.netlify.app';
