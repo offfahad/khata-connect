@@ -12,8 +12,8 @@ class TransactionRepository {
   Future getCustomerTransactionsTotal(int id) =>
       transactionDao.getCustomerTransactionsTotal(id);
 
-  Future<double> getTotalGivenToCustomers(int businessId) {
-    return transactionDao.getTotalGivenToCustomers(businessId);
+  Future<double> getTotalToGiveToCustomers(int businessId) {
+    return transactionDao.getTotalToGiveToCustomers(businessId);
   }
 
   Future<double> getTotalToReceiveFromCustomers(int businessId) {

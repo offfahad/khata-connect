@@ -53,14 +53,13 @@ class _CustomersState extends State<Customers> {
               children: [
                 Container(
                   alignment: Alignment.center,
-                  height: 100,
                   child: Column(
                     children: [
                       Container(
-                        padding: const EdgeInsets.fromLTRB(8, 15, 8, 0),
+                        padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
                         child: Card(
                           color: isDarkMode
-                              ? const Color(0xFF444654)
+                              ? Theme.of(context).cardColor
                               : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -69,8 +68,10 @@ class _CustomersState extends State<Customers> {
                           semanticContainer: true,
                           clipBehavior: Clip.antiAliasWithSaveLayer,
                           child: Container(
-                            padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 2),
                             child: TextField(
+                              onTapOutside: (event) =>
+                                  FocusScope.of(context).unfocus(),
                               controller: _searchInputController,
                               style:
                                   TextStyle(color: theme.colorScheme.onSurface),
@@ -103,6 +104,31 @@ class _CustomersState extends State<Customers> {
                               },
                             ),
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildTotalCard(
+                          context,
+                          'To Receive',
+                          getTotalToReceiveFromCustomersWidget(),
+                          Colors.green,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTotalCard(
+                          context,
+                          'To Give',
+                          getTotalToGiveToCustomersWidget(),
+                          Colors.red,
                         ),
                       ),
                     ],
@@ -156,6 +182,50 @@ class _CustomersState extends State<Customers> {
             ),
           ),
       ],
+    );
+  }
+
+  // Helper method to create total cards
+  Widget _buildTotalCard(
+      BuildContext context, String title, Widget totalWidget, Color color) {
+    final theme = Theme.of(context);
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            totalWidget,
+          ],
+        ),
+      ),
     );
   }
 
@@ -358,7 +428,6 @@ class _CustomersState extends State<Customers> {
 
   Widget getBusinessTransactionsTotalWidget() {
     final bid = Provider.of<AppStateNotifier>(context).selectedBusiness;
-    if (bid == null) return const SizedBox();
 
     return FutureBuilder<double>(
       future: transactionBloc.getBusinessTransactionsTotal(bid),
@@ -390,28 +459,38 @@ class _CustomersState extends State<Customers> {
     );
   }
 
-  Widget getTotalGivenToCustomersWidget() {
+  Widget getTotalToGiveToCustomersWidget() {
     final bid = Provider.of<AppStateNotifier>(context).selectedBusiness;
-    if (bid == null) return const SizedBox();
 
     return FutureBuilder<double>(
-      future: transactionBloc.getTotalGivenToCustomers(bid),
+      future: transactionBloc.getTotalToGiveToCustomers(bid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(
-              color: Theme.of(context).primaryColor);
+          return SizedBox(
+            width: 60,
+            height: 20,
+            child: LinearProgressIndicator(
+              backgroundColor: Theme.of(context).dividerColor,
+              color: Colors.red,
+            ),
+          );
         }
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}',
-              style: TextStyle(color: Theme.of(context).colorScheme.error));
+          return Text(
+            'Error',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          );
         }
         if (snapshot.hasData) {
-          final totalGiven = snapshot.data!;
+          final totalToGive = snapshot.data!;
           return FittedBox(
             child: Text(
-              amountFormat(context, totalGiven),
-              style: const TextStyle(
-                fontSize: 24,
+              amountFormat(context, totalToGive),
+              style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Colors.red,
               ),
@@ -425,26 +504,36 @@ class _CustomersState extends State<Customers> {
 
   Widget getTotalToReceiveFromCustomersWidget() {
     final bid = Provider.of<AppStateNotifier>(context).selectedBusiness;
-    if (bid == null) return const SizedBox();
 
     return FutureBuilder<double>(
       future: transactionBloc.getTotalToReceiveFromCustomers(bid),
       builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(
-              color: Theme.of(context).primaryColor);
+          return SizedBox(
+            width: 60,
+            height: 20,
+            child: LinearProgressIndicator(
+              backgroundColor: Theme.of(context).dividerColor,
+              color: Colors.green,
+            ),
+          );
         }
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}',
-              style: TextStyle(color: Theme.of(context).colorScheme.error));
+          return Text(
+            'Error',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.error,
+            ),
+          );
         }
         if (snapshot.hasData) {
           final totalToReceive = snapshot.data!;
           return FittedBox(
             child: Text(
               amountFormat(context, totalToReceive),
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Colors.green,
               ),

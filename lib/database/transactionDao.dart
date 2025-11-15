@@ -98,32 +98,75 @@ class TransactionDao {
     return totalTransaction;
   }
 
-  Future<double> getTotalGivenToCustomers(int businessId) async {
+  Future<double> getTotalToGiveToCustomers(int businessId) async {
     final db = await dbProvider.database;
+
+    // Get all transactions for the business
     List<Map<String, dynamic>> result = await db.query(
       transactionTABLE,
-      where: 'businessId = ? AND ttype = ?',
-      whereArgs: [businessId, 'credit'],
+      where: 'businessId = ?',
+      whereArgs: [businessId],
     );
 
-    double totalGiven = result.fold(0, (sum, item) {
-      return sum + (item['amount'] ?? 0);
-    });
+    // Calculate net balance per customer
+    Map<int, double> customerBalances = {};
 
-    return totalGiven;
+    for (var item in result) {
+      int customerId = item['uid'];
+      String ttype = item['ttype'];
+      double amount = (item['amount'] ?? 0).toDouble();
+
+      if (ttype == 'credit') {
+        // When you give credit, customer owes you money (positive balance)
+        customerBalances.update(customerId, (value) => value + amount,
+            ifAbsent: () => amount);
+      } else if (ttype == 'payment') {
+        // When customer pays, it reduces what they owe (negative balance)
+        customerBalances.update(customerId, (value) => value - amount,
+            ifAbsent: () => -amount);
+      }
+    }
+
+    // Sum only negative balances (you owe money to customers)
+    double totalToGive = customerBalances.values
+        .where((balance) => balance < 0)
+        .fold(0.0, (sum, balance) => sum + balance.abs());
+
+    return totalToGive;
   }
 
   Future<double> getTotalToReceiveFromCustomers(int businessId) async {
     final db = await dbProvider.database;
+
+    // Get all transactions for the business
     List<Map<String, dynamic>> result = await db.query(
       transactionTABLE,
-      where: 'businessId = ? AND ttype = ?',
-      whereArgs: [businessId, 'payment'],
+      where: 'businessId = ?',
+      whereArgs: [businessId],
     );
 
-    double totalToReceive = result.fold(0, (sum, item) {
-      return sum + (item['amount'] ?? 0);
-    });
+    // Calculate net balance per customer
+    Map<int, double> customerBalances = {};
+
+    for (var item in result) {
+      int customerId = item['uid'];
+      String ttype = item['ttype'];
+      double amount = (item['amount'] ?? 0).toDouble();
+
+      if (ttype == 'credit') {
+        // When you give credit, customer owes you money (positive balance)
+        customerBalances.update(customerId, (value) => value + amount,
+            ifAbsent: () => amount);
+      } else if (ttype == 'payment') {
+        // When customer pays, it reduces what they owe (negative balance)
+        customerBalances.update(customerId, (value) => value - amount,
+            ifAbsent: () => -amount);
+      }
+    }
+    // Sum only positive balances (customers who owe you money)
+    double totalToReceive = customerBalances.values
+        .where((balance) => balance > 0)
+        .fold(0.0, (sum, balance) => sum + balance);
 
     return totalToReceive;
   }

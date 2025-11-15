@@ -40,8 +40,8 @@ class TransactionBloc {
     return total;
   }
 
-  Future<double> getTotalGivenToCustomers(int businessId) async {
-    return await _transactionRepository.getTotalGivenToCustomers(businessId);
+  Future<double> getTotalToGiveToCustomers(int businessId) async {
+    return await _transactionRepository.getTotalToGiveToCustomers(businessId);
   }
 
   Future<double> getTotalToReceiveFromCustomers(int businessId) async {

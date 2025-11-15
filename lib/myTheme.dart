@@ -76,7 +76,7 @@ class MyTheme {
         iconColor: Colors.grey.shade800,
         textColor: Colors.grey.shade900,
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: Colors.indigo.shade700,
         unselectedLabelColor: Colors.grey.shade600,
         indicator: UnderlineTabIndicator(
@@ -171,7 +171,7 @@ class MyTheme {
         iconColor: Colors.white,
         textColor: Colors.white,
       ),
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: Colors.indigo.shade300,
         unselectedLabelColor: Colors.grey.shade500,
         indicator: UnderlineTabIndicator(
